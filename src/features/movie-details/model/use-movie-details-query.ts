@@ -23,24 +23,28 @@ export function useMovieDetailsQuery(movieId: number) {
   const detail = useQuery(movieQueries.detail(movieId))
   const credits = useQuery(movieQueries.credits(movieId))
   const videos = useQuery(movieQueries.videos(movieId))
+  const watchProviders = useQuery(movieQueries.watchProviders(movieId))
 
   const trailer = useMemo(
     () => selectTrailer(videos.data?.results ?? []),
     [videos.data],
   )
 
+  const brProviders = watchProviders.data?.results?.BR ?? null
+
   const isLoading = detail.isLoading || credits.isLoading || videos.isLoading
   const isError = detail.isError || credits.isError || videos.isError
   const error = detail.error ?? credits.error ?? videos.error
 
   function refetch() {
-    return Promise.all([detail.refetch(), credits.refetch(), videos.refetch()])
+    return Promise.all([detail.refetch(), credits.refetch(), videos.refetch(), watchProviders.refetch()])
   }
 
   return {
     detail: detail.data,
     credits: credits.data,
     trailer,
+    watchProviders: brProviders,
     isLoading,
     isError,
     error,

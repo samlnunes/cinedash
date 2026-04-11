@@ -6,6 +6,7 @@ import type {
   MovieDetails,
   MovieVideosResponse,
   PaginatedResponse,
+  WatchProvidersResponse,
 } from '../model/movie.types'
 
 export function getTrendingMovies(page = 1) {
@@ -70,4 +71,8 @@ export function getMovieVideos(movieId: number) {
   return tmdbFetch<MovieVideosResponse>(`/movie/${movieId}/videos`, {
     language: 'pt-BR',
   })
+}
+
+export function getMovieWatchProviders(movieId: number) {
+  return tmdbFetch<WatchProvidersResponse>(`/movie/${movieId}/watch/providers`)
 }

@@ -10,6 +10,7 @@ export {
   getMovieDetails,
   getMovieCredits,
   getMovieVideos,
+  getMovieWatchProviders,
 } from './api/movie.api'
 export type { DiscoverParams } from './api/movie.api'
 
@@ -23,6 +24,9 @@ export type {
   MovieCreditsResponse,
   MovieVideo,
   MovieVideosResponse,
+  WatchProvider,
+  WatchProviderCountry,
+  WatchProvidersResponse,
 } from './model/movie.types'
 
 export { movieKeys, movieQueries } from './api/movie.queries'

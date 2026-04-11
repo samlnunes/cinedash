@@ -8,6 +8,7 @@ import {
   getMovieDetails,
   getMovieCredits,
   getMovieVideos,
+  getMovieWatchProviders,
 } from './movie.api'
 
 interface DiscoveryParams {
@@ -56,6 +57,7 @@ export const movieKeys = {
   detail: (movieId: number) => ['movies', 'detail', movieId] as const,
   credits: (movieId: number) => ['movies', 'credits', movieId] as const,
   videos: (movieId: number) => ['movies', 'videos', movieId] as const,
+  watchProviders: (movieId: number) => ['movies', 'watchProviders', movieId] as const,
 }
 
 export const movieQueries = {
@@ -91,5 +93,12 @@ export const movieQueries = {
       queryKey: movieKeys.videos(movieId),
       queryFn: () => getMovieVideos(movieId),
       staleTime: 1000 * 60 * 30,
+    }),
+
+  watchProviders: (movieId: number) =>
+    queryOptions({
+      queryKey: movieKeys.watchProviders(movieId),
+      queryFn: () => getMovieWatchProviders(movieId),
+      staleTime: 1000 * 60 * 60,
     }),
 }
