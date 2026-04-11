@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -8,6 +9,7 @@ import {
   Shield,
   Moon,
   Sun,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
@@ -18,6 +20,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/shared/ui/sheet";
 import { useAuthStore } from "@/features/auth";
 import { useThemeStore, resolveEffectiveTheme } from "@/features/theme";
 
@@ -30,6 +39,7 @@ export function ProtectedHeader() {
   const toggle = useThemeStore((s) => s.toggle);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const displayName = profile?.display_name ?? user?.email ?? "";
   const avatarUrl = profile?.avatar_url ?? undefined;
@@ -47,11 +57,76 @@ export function ProtectedHeader() {
     navigate({ to: "/login" });
   };
 
+  const mobileNavLinks = [
+    { to: "/dashboard" as const, icon: Film, label: "Dashboard" },
+    { to: "/watchlist" as const, icon: BookMarked, label: "Minha Lista" },
+    { to: "/requests" as const, icon: ClipboardList, label: "Pedidos" },
+    ...(isAdmin()
+      ? [{ to: "/admin/requests" as const, icon: Shield, label: "Admin" }]
+      : []),
+  ];
+
   return (
     <header className="border-b bg-card">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-6">
-          <Link to="/dashboard" className="cursor-pointer">
+          {/* Mobile hamburger */}
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm" className="sm:hidden -ml-2">
+                <Menu className="size-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72 p-0">
+              <SheetHeader className="p-6 pb-4 border-b">
+                <SheetTitle className="text-left">
+                  <img
+                    src={
+                      effective === "dark"
+                        ? "https://www.slntech.com.br/logo-light.svg"
+                        : "https://www.slntech.com.br/logo-dark.svg"
+                    }
+                    alt="CineDash"
+                    className="h-10"
+                  />
+                </SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col p-3 gap-0.5">
+                {mobileNavLinks.map(({ to, icon: Icon, label }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    onClick={() => setSheetOpen(false)}
+                    className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
+                  >
+                    <Icon className="size-5" />
+                    {label}
+                  </Link>
+                ))}
+              </nav>
+              <div className="mt-auto border-t p-4">
+                <div className="flex items-center gap-3">
+                  <Avatar className="size-9">
+                    <AvatarImage src={avatarUrl} alt={displayName} />
+                    <AvatarFallback className="text-xs">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {displayName}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {user?.email}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Logo */}
+          <Link to="/dashboard" className="cursor-pointer shrink-0">
             <img
               src={
                 effective === "dark"
@@ -59,10 +134,12 @@ export function ProtectedHeader() {
                   : "https://www.slntech.com.br/logo-dark.svg"
               }
               alt="CineDash"
-              className="h-10"
+              className="h-10 hidden sm:block"
             />
           </Link>
-          <nav className="flex items-center gap-1">
+
+          {/* Desktop nav */}
+          <nav className="hidden sm:flex items-center gap-1">
             <Button variant="ghost" size="sm" asChild>
               <Link to="/dashboard">
                 <Film className="size-4" />
