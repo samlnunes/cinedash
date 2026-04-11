@@ -15,6 +15,7 @@ import {
   useMovieDetailsQuery,
   MovieTrailer,
   MovieCastList,
+  MovieWatchProviders,
 } from '@/features/movie-details'
 import { useIsInWatchlist, useToggleWatchlist } from '@/features/watchlist'
 import { useHasRequested, RequestModal, REQUEST_STATUS_LABELS } from '@/features/requests'
@@ -25,7 +26,7 @@ interface MovieDetailsViewProps {
 }
 
 export function MovieDetailsView({ movieId }: MovieDetailsViewProps) {
-  const { detail, credits, trailer, isLoading, isError, error, refetch } =
+  const { detail, credits, trailer, watchProviders, isLoading, isError, error, refetch } =
     useMovieDetailsQuery(movieId)
 
   if (isLoading) return <DetailsSkeleton />
@@ -79,6 +80,13 @@ export function MovieDetailsView({ movieId }: MovieDetailsViewProps) {
         genreNames={genreNames}
         movie={movieForWatchlist}
       />
+
+      {watchProviders && (
+        <section className="mt-8 space-y-3">
+          <h2 className="text-xl font-semibold">Onde assistir</h2>
+          <MovieWatchProviders providers={watchProviders} />
+        </section>
+      )}
 
       <section className="mt-8 space-y-3">
         <h2 className="text-xl font-semibold">Elenco</h2>
