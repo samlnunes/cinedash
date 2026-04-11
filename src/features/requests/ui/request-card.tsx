@@ -1,4 +1,5 @@
 import { X } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { posterUrl } from '@/shared/api/tmdb/client'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
@@ -19,14 +20,26 @@ export function RequestCard({ request }: RequestCardProps) {
 
   return (
     <div className="flex gap-4 rounded-lg border bg-card p-4">
-      <img
-        src={posterUrl(request.poster_path, 'w185')}
-        alt={request.title}
-        className="h-28 w-20 rounded object-cover shrink-0"
-      />
+      <Link
+        to="/movie/$movieId"
+        params={{ movieId: String(request.tmdb_id) }}
+        className="shrink-0"
+      >
+        <img
+          src={posterUrl(request.poster_path, 'w185')}
+          alt={request.title}
+          className="h-28 w-20 rounded object-cover transition-opacity hover:opacity-80"
+        />
+      </Link>
       <div className="flex flex-col gap-1 min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <p className="font-medium truncate">{request.title}</p>
+          <Link
+            to="/movie/$movieId"
+            params={{ movieId: String(request.tmdb_id) }}
+            className="font-medium truncate hover:underline"
+          >
+            {request.title}
+          </Link>
           <Badge
             className={REQUEST_STATUS_COLORS[request.status]}
           >

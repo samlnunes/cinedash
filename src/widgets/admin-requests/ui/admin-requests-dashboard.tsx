@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Inbox } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { posterUrl } from "@/shared/api/tmdb/client";
 import { Badge } from "@/shared/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
@@ -60,16 +61,28 @@ export function AdminRequestsDashboard() {
               className="rounded-lg border bg-card p-3 sm:p-4"
             >
               <div className="flex gap-3 sm:gap-4">
-                <img
-                  src={posterUrl(request.poster_path, "w185")}
-                  alt={request.title}
-                  className="h-24 w-16 sm:h-20 sm:w-14 rounded object-cover shrink-0"
-                />
+                <Link
+                  to="/movie/$movieId"
+                  params={{ movieId: String(request.tmdb_id) }}
+                  className="shrink-0"
+                >
+                  <img
+                    src={posterUrl(request.poster_path, "w185")}
+                    alt={request.title}
+                    className="h-24 w-16 sm:h-20 sm:w-14 rounded object-cover transition-opacity hover:opacity-80"
+                  />
+                </Link>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="flex items-baseline gap-1.5">
-                        <p className="font-medium truncate">{request.title}</p>
+                        <Link
+                          to="/movie/$movieId"
+                          params={{ movieId: String(request.tmdb_id) }}
+                          className="font-medium truncate hover:underline"
+                        >
+                          {request.title}
+                        </Link>
                         {request.year && (
                           <span className="text-sm text-muted-foreground shrink-0">
                             ({request.year})
