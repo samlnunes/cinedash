@@ -1,38 +1,45 @@
-import { useState } from 'react'
-import { Button } from '@/shared/ui/button'
+import { useState } from "react";
+import { Button } from "@/shared/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/shared/ui/card'
-import { useAuthStore } from '../model/auth.store'
-import { Film } from 'lucide-react'
+} from "@/shared/ui/card";
+import { useAuthStore } from "../model/auth.store";
+import { useThemeStore, resolveEffectiveTheme } from "@/features/theme";
 
 export function LoginForm() {
-  const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle)
-  const [authError, setAuthError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
+  const mode = useThemeStore((s) => s.mode);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
-    setAuthError(null)
-    setLoading(true)
-    const result = await signInWithGoogle()
+    setAuthError(null);
+    setLoading(true);
+    const result = await signInWithGoogle();
 
     if (result.error) {
-      setAuthError(result.error)
-      setLoading(false)
+      setAuthError(result.error);
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <Film className="size-6" />
-          <CardTitle className="text-2xl">CineDash</CardTitle>
-        </div>
+        <img
+          src={
+            resolveEffectiveTheme(mode) === "dark"
+              ? "https://www.slntech.com.br/logo-light.svg"
+              : "https://www.slntech.com.br/logo-dark.svg"
+          }
+          alt="CineDash"
+          className="h-10"
+        />
+        <CardTitle className="text-2xl">CineDash</CardTitle>
         <CardDescription>
           Faça login para acessar o dashboard de curadoria.
         </CardDescription>
@@ -68,10 +75,10 @@ export function LoginForm() {
                 fill="#EA4335"
               />
             </svg>
-            {loading ? 'Redirecionando...' : 'Entrar com Google'}
+            {loading ? "Redirecionando..." : "Entrar com Google"}
           </Button>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
