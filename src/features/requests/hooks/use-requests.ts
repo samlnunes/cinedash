@@ -15,10 +15,13 @@ export function useMyRequests() {
   return useQuery({
     queryKey: requestKeys.mine(),
     queryFn: async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
       const { data, error } = await supabase
         .from('requests')
         .select('*')
         .eq('user_id', userId!)
+        .or(`status.neq.done,updated_at.gte.${sevenDaysAgo}`)
         .order('created_at', { ascending: false })
 
       if (error) throw error

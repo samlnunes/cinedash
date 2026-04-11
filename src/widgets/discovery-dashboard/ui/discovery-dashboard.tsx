@@ -8,7 +8,7 @@ import {
   useDiscoveryQuery,
   usePrefetchNextPage,
 } from '@/features/movie-discovery'
-import { useWatchlistStore } from '@/features/watchlist'
+import { useIsInWatchlist, useToggleWatchlist } from '@/features/watchlist'
 import { RequestButton } from '@/features/requests'
 
 const SKELETON_COUNT = 12
@@ -83,8 +83,8 @@ export function DiscoveryDashboard() {
 }
 
 function WatchlistToggle({ movie }: { movie: Movie }) {
-  const toggle = useWatchlistStore((s) => s.toggle)
-  const inList = useWatchlistStore((s) => s.has(movie.id))
+  const { toggle, isPending } = useToggleWatchlist()
+  const inList = useIsInWatchlist(movie.id)
 
   return (
     <Button
@@ -92,6 +92,7 @@ function WatchlistToggle({ movie }: { movie: Movie }) {
       size="xs"
       className="w-full"
       onClick={() => toggle(movie)}
+      disabled={isPending}
     >
       {inList ? (
         <>

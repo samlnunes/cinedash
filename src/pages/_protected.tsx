@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { useAuthStore } from '@/features/auth'
-import { useWatchlistStore, useMigrateLocalStorage } from '@/features/watchlist'
 import { useDiscoveryStore } from '@/features/movie-discovery'
 import { useThemeStore } from '@/features/theme'
 import { ProtectedHeader } from '@/widgets/protected-header'
@@ -19,10 +18,7 @@ export const Route = createFileRoute('/_protected')({
 function ProtectedLayout() {
   const userId = useAuthStore((s) => s.user?.id)
 
-  useMigrateLocalStorage(userId)
-
   useEffect(() => {
-    useWatchlistStore.persist.rehydrate()
     useDiscoveryStore.persist.rehydrate()
     useThemeStore.persist.rehydrate()
   }, [userId])

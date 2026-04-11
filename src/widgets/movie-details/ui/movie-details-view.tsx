@@ -16,7 +16,7 @@ import {
   MovieTrailer,
   MovieCastList,
 } from '@/features/movie-details'
-import { useWatchlistStore } from '@/features/watchlist'
+import { useIsInWatchlist, useToggleWatchlist } from '@/features/watchlist'
 import { useHasRequested, RequestModal, REQUEST_STATUS_LABELS } from '@/features/requests'
 import { Badge } from '@/shared/ui/badge'
 
@@ -116,8 +116,8 @@ function HeroSection({
   genreNames: string
   movie: Movie
 }) {
-  const toggle = useWatchlistStore((s) => s.toggle)
-  const inList = useWatchlistStore((s) => s.has(movie.id))
+  const { toggle, isPending: watchlistPending } = useToggleWatchlist()
+  const inList = useIsInWatchlist(movie.id)
   const { data: existing } = useHasRequested(movie.id)
   const [requestModalOpen, setRequestModalOpen] = useState(false)
 
@@ -200,6 +200,7 @@ function HeroSection({
               variant={inList ? 'outline' : 'default'}
               size="sm"
               onClick={() => toggle(movie)}
+              disabled={watchlistPending}
             >
               {inList ? (
                 <>
