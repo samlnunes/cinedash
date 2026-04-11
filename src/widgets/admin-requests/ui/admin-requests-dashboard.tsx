@@ -57,51 +57,59 @@ export function AdminRequestsDashboard() {
           {requests.map((request) => (
             <div
               key={request.id}
-              className="flex items-center gap-4 rounded-lg border bg-card p-4"
+              className="rounded-lg border bg-card p-3 sm:p-4"
             >
-              <img
-                src={posterUrl(request.poster_path, "w185")}
-                alt={request.title}
-                className="h-20 w-14 rounded object-cover shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium truncate">{request.title}</p>
-                  {request.year && (
-                    <span className="text-sm text-muted-foreground shrink-0">
-                      ({request.year})
-                    </span>
-                  )}
-                </div>
-                {request.note && (
-                  <p className="text-sm text-muted-foreground truncate mt-0.5">
-                    {request.note}
-                  </p>
-                )}
-                <div className="flex items-center gap-1.5 mt-1">
-                  {(request as any).profiles && (
-                    <>
-                      <Avatar className="size-4">
-                        <AvatarImage src={(request as any).profiles.avatar_url ?? undefined} />
-                        <AvatarFallback className="text-[8px]">
-                          {((request as any).profiles.display_name ?? '?')[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs text-muted-foreground">
-                        {(request as any).profiles.display_name}
-                      </span>
-                      <span className="text-xs text-muted-foreground">·</span>
-                    </>
-                  )}
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(request.created_at).toLocaleDateString("pt-BR")}
-                  </span>
+              <div className="flex gap-3 sm:gap-4">
+                <img
+                  src={posterUrl(request.poster_path, "w185")}
+                  alt={request.title}
+                  className="h-24 w-16 sm:h-20 sm:w-14 rounded object-cover shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-baseline gap-1.5">
+                        <p className="font-medium truncate">{request.title}</p>
+                        {request.year && (
+                          <span className="text-sm text-muted-foreground shrink-0">
+                            ({request.year})
+                          </span>
+                        )}
+                      </div>
+                      {request.note && (
+                        <p className="text-sm text-muted-foreground truncate mt-0.5">
+                          {request.note}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        {(request as any).profiles && (
+                          <>
+                            <Avatar className="size-4">
+                              <AvatarImage src={(request as any).profiles.avatar_url ?? undefined} />
+                              <AvatarFallback className="text-[8px]">
+                                {((request as any).profiles.display_name ?? '?')[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs text-muted-foreground">
+                              {(request as any).profiles.display_name}
+                            </span>
+                            <span className="text-xs text-muted-foreground">·</span>
+                          </>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(request.created_at).toLocaleDateString("pt-BR")}
+                        </span>
+                      </div>
+                    </div>
+                    <Badge className={`shrink-0 ${REQUEST_STATUS_COLORS[request.status]}`}>
+                      {REQUEST_STATUS_LABELS[request.status]}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-end mt-2 sm:mt-0">
+                    <AdminActions request={request} />
+                  </div>
                 </div>
               </div>
-              <Badge className={REQUEST_STATUS_COLORS[request.status]}>
-                {REQUEST_STATUS_LABELS[request.status]}
-              </Badge>
-              <AdminActions request={request} />
             </div>
           ))}
         </div>
