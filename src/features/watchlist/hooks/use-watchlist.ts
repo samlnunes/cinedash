@@ -37,14 +37,19 @@ export function useAddToWatchlist() {
   const userId = useAuthStore((s) => s.user?.id)
 
   return useMutation({
-    mutationFn: async (movie: Movie) => {
+    mutationFn: async (movie: Movie & { media_type?: string; name?: string; first_air_date?: string }) => {
+      const isTv = movie.media_type === 'tv'
+      const title = isTv ? (movie.name ?? movie.title) : movie.title
+      const date = isTv ? (movie.first_air_date ?? movie.release_date) : movie.release_date
+
       const { error } = await supabase.from('watchlist').upsert(
         {
           user_id: userId!,
           tmdb_id: movie.id,
-          title: movie.title,
+          media_type: isTv ? 'tv' : 'movie',
+          title,
           poster_path: movie.poster_path,
-          year: movie.release_date?.slice(0, 4) ?? null,
+          year: date?.slice(0, 4) ?? null,
           vote_average: movie.vote_average,
         },
         { onConflict: 'user_id,tmdb_id,media_type' },

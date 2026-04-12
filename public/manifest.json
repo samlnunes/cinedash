@@ -1,15 +1,26 @@
 {
   "short_name": "CineDash",
   "name": "CineDash",
+  "description": "Dashboard de curadoria de filmes e séries",
   "icons": [
     {
       "src": "https://www.slntech.com.br/logo-light.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "https://www.slntech.com.br/logo-dark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#0a0a0a",
+  "background_color": "#0a0a0a",
+  "categories": ["entertainment"]
 }

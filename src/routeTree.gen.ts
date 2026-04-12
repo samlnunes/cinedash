@@ -12,9 +12,13 @@ import { Route as rootRouteImport } from './pages/__root'
 import { Route as LoginRouteImport } from './pages/login'
 import { Route as ProtectedRouteImport } from './pages/_protected'
 import { Route as IndexRouteImport } from './pages/index'
+import { Route as ShareTokenRouteImport } from './pages/share.$token'
 import { Route as ProtectedWatchlistRouteImport } from './pages/_protected/watchlist'
+import { Route as ProtectedUpcomingRouteImport } from './pages/_protected/upcoming'
+import { Route as ProtectedSeriesRouteImport } from './pages/_protected/series'
 import { Route as ProtectedRequestsRouteImport } from './pages/_protected/requests'
 import { Route as ProtectedDashboardRouteImport } from './pages/_protected/dashboard'
+import { Route as ProtectedTvTvIdRouteImport } from './pages/_protected/tv.$tvId'
 import { Route as ProtectedMovieMovieIdRouteImport } from './pages/_protected/movie.$movieId'
 import { Route as ProtectedAdminRequestsRouteImport } from './pages/_protected/admin.requests'
 
@@ -32,9 +36,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShareTokenRoute = ShareTokenRouteImport.update({
+  id: '/share/$token',
+  path: '/share/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedWatchlistRoute = ProtectedWatchlistRouteImport.update({
   id: '/watchlist',
   path: '/watchlist',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedUpcomingRoute = ProtectedUpcomingRouteImport.update({
+  id: '/upcoming',
+  path: '/upcoming',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedSeriesRoute = ProtectedSeriesRouteImport.update({
+  id: '/series',
+  path: '/series',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedRequestsRoute = ProtectedRequestsRouteImport.update({
@@ -45,6 +64,11 @@ const ProtectedRequestsRoute = ProtectedRequestsRouteImport.update({
 const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedTvTvIdRoute = ProtectedTvTvIdRouteImport.update({
+  id: '/tv/$tvId',
+  path: '/tv/$tvId',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedMovieMovieIdRoute = ProtectedMovieMovieIdRouteImport.update({
@@ -63,18 +87,26 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/requests': typeof ProtectedRequestsRoute
+  '/series': typeof ProtectedSeriesRoute
+  '/upcoming': typeof ProtectedUpcomingRoute
   '/watchlist': typeof ProtectedWatchlistRoute
+  '/share/$token': typeof ShareTokenRoute
   '/admin/requests': typeof ProtectedAdminRequestsRoute
   '/movie/$movieId': typeof ProtectedMovieMovieIdRoute
+  '/tv/$tvId': typeof ProtectedTvTvIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof ProtectedDashboardRoute
   '/requests': typeof ProtectedRequestsRoute
+  '/series': typeof ProtectedSeriesRoute
+  '/upcoming': typeof ProtectedUpcomingRoute
   '/watchlist': typeof ProtectedWatchlistRoute
+  '/share/$token': typeof ShareTokenRoute
   '/admin/requests': typeof ProtectedAdminRequestsRoute
   '/movie/$movieId': typeof ProtectedMovieMovieIdRoute
+  '/tv/$tvId': typeof ProtectedTvTvIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,9 +115,13 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_protected/dashboard': typeof ProtectedDashboardRoute
   '/_protected/requests': typeof ProtectedRequestsRoute
+  '/_protected/series': typeof ProtectedSeriesRoute
+  '/_protected/upcoming': typeof ProtectedUpcomingRoute
   '/_protected/watchlist': typeof ProtectedWatchlistRoute
+  '/share/$token': typeof ShareTokenRoute
   '/_protected/admin/requests': typeof ProtectedAdminRequestsRoute
   '/_protected/movie/$movieId': typeof ProtectedMovieMovieIdRoute
+  '/_protected/tv/$tvId': typeof ProtectedTvTvIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -94,18 +130,26 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard'
     | '/requests'
+    | '/series'
+    | '/upcoming'
     | '/watchlist'
+    | '/share/$token'
     | '/admin/requests'
     | '/movie/$movieId'
+    | '/tv/$tvId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/dashboard'
     | '/requests'
+    | '/series'
+    | '/upcoming'
     | '/watchlist'
+    | '/share/$token'
     | '/admin/requests'
     | '/movie/$movieId'
+    | '/tv/$tvId'
   id:
     | '__root__'
     | '/'
@@ -113,15 +157,20 @@ export interface FileRouteTypes {
     | '/login'
     | '/_protected/dashboard'
     | '/_protected/requests'
+    | '/_protected/series'
+    | '/_protected/upcoming'
     | '/_protected/watchlist'
+    | '/share/$token'
     | '/_protected/admin/requests'
     | '/_protected/movie/$movieId'
+    | '/_protected/tv/$tvId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ShareTokenRoute: typeof ShareTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -147,11 +196,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/share/$token': {
+      id: '/share/$token'
+      path: '/share/$token'
+      fullPath: '/share/$token'
+      preLoaderRoute: typeof ShareTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_protected/watchlist': {
       id: '/_protected/watchlist'
       path: '/watchlist'
       fullPath: '/watchlist'
       preLoaderRoute: typeof ProtectedWatchlistRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/upcoming': {
+      id: '/_protected/upcoming'
+      path: '/upcoming'
+      fullPath: '/upcoming'
+      preLoaderRoute: typeof ProtectedUpcomingRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/series': {
+      id: '/_protected/series'
+      path: '/series'
+      fullPath: '/series'
+      preLoaderRoute: typeof ProtectedSeriesRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/requests': {
@@ -166,6 +236,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof ProtectedDashboardRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/tv/$tvId': {
+      id: '/_protected/tv/$tvId'
+      path: '/tv/$tvId'
+      fullPath: '/tv/$tvId'
+      preLoaderRoute: typeof ProtectedTvTvIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/movie/$movieId': {
@@ -188,17 +265,23 @@ declare module '@tanstack/react-router' {
 interface ProtectedRouteChildren {
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
   ProtectedRequestsRoute: typeof ProtectedRequestsRoute
+  ProtectedSeriesRoute: typeof ProtectedSeriesRoute
+  ProtectedUpcomingRoute: typeof ProtectedUpcomingRoute
   ProtectedWatchlistRoute: typeof ProtectedWatchlistRoute
   ProtectedAdminRequestsRoute: typeof ProtectedAdminRequestsRoute
   ProtectedMovieMovieIdRoute: typeof ProtectedMovieMovieIdRoute
+  ProtectedTvTvIdRoute: typeof ProtectedTvTvIdRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedDashboardRoute: ProtectedDashboardRoute,
   ProtectedRequestsRoute: ProtectedRequestsRoute,
+  ProtectedSeriesRoute: ProtectedSeriesRoute,
+  ProtectedUpcomingRoute: ProtectedUpcomingRoute,
   ProtectedWatchlistRoute: ProtectedWatchlistRoute,
   ProtectedAdminRequestsRoute: ProtectedAdminRequestsRoute,
   ProtectedMovieMovieIdRoute: ProtectedMovieMovieIdRoute,
+  ProtectedTvTvIdRoute: ProtectedTvTvIdRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
@@ -209,6 +292,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
   LoginRoute: LoginRoute,
+  ShareTokenRoute: ShareTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -72,6 +72,26 @@ export function useCancelRequest() {
   })
 }
 
+export function useCommunityRequests() {
+  const userId = useAuthStore((s) => s.user?.id)
+
+  return useQuery({
+    queryKey: [...requestKeys.all, 'community'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('requests')
+        .select('*, profiles(display_name, avatar_url)')
+        .eq('status', 'pending')
+        .neq('user_id', userId!)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return data
+    },
+    enabled: !!userId,
+  })
+}
+
 export function useHasRequested(tmdbId: number) {
   const { data: requests, ...rest } = useMyRequests()
   const existing = requests?.find((r) => r.tmdb_id === tmdbId) ?? null

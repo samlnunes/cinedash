@@ -29,6 +29,7 @@ import {
 } from "@/shared/ui/sheet";
 import { useAuthStore } from "@/features/auth";
 import { useThemeStore, resolveEffectiveTheme } from "@/features/theme";
+import { NotificationBell } from "@/features/notifications";
 
 export function ProtectedHeader() {
   const user = useAuthStore((s) => s.user);
@@ -169,6 +170,8 @@ export function ProtectedHeader() {
           </nav>
         </div>
 
+        <div className="flex items-center gap-1">
+        <NotificationBell />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -199,6 +202,7 @@ export function ProtectedHeader() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </div>
     </header>
   );

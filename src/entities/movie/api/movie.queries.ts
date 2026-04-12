@@ -1,9 +1,10 @@
 import { queryOptions } from '@tanstack/react-query'
 import {
-  getTrendingMovies,
+  getTrendingAll,
   getPopularMovies,
+  getUpcomingMovies,
   discoverMovies,
-  searchMovies,
+  searchMulti,
   getMovieGenres,
   getMovieDetails,
   getMovieCredits,
@@ -30,11 +31,11 @@ function discoveryQueryFn(params: DiscoveryParams) {
   const { tab, page, query, filters } = params
 
   if (query.trim()) {
-    return searchMovies(query.trim(), page)
+    return searchMulti(query.trim(), page)
   }
 
   if (tab === 'trending' && !hasActiveFilters(filters)) {
-    return getTrendingMovies(page)
+    return getTrendingAll(page)
   }
 
   if (tab === 'popular' && !hasActiveFilters(filters)) {
@@ -58,6 +59,7 @@ export const movieKeys = {
   credits: (movieId: number) => ['movies', 'credits', movieId] as const,
   videos: (movieId: number) => ['movies', 'videos', movieId] as const,
   watchProviders: (movieId: number) => ['movies', 'watchProviders', movieId] as const,
+  upcoming: (page: number) => ['movies', 'upcoming', page] as const,
 }
 
 export const movieQueries = {
@@ -100,5 +102,12 @@ export const movieQueries = {
       queryKey: movieKeys.watchProviders(movieId),
       queryFn: () => getMovieWatchProviders(movieId),
       staleTime: 1000 * 60 * 60,
+    }),
+
+  upcoming: (page = 1) =>
+    queryOptions({
+      queryKey: movieKeys.upcoming(page),
+      queryFn: () => getUpcomingMovies(page),
+      staleTime: 1000 * 60 * 30,
     }),
 }

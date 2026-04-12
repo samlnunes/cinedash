@@ -10,21 +10,26 @@ export function DiscoveryFilters() {
     useDiscoveryStore()
   const { data: genres } = useGenresQuery()
 
-  const hasFilters =
-    filters.genreId !== undefined ||
-    filters.year !== undefined ||
-    filters.minRating !== undefined
+  const hasFilters = filters.genreId !== undefined
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Buscar filmes..."
+          placeholder="Buscar filmes e séries..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-9"
+          className="pl-9 pr-9"
         />
+        {query && (
+          <button
+            onClick={() => setQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="size-4" />
+          </button>
+        )}
       </div>
 
       <Select value={filters.genreId?.toString() ?? ''} onValueChange={(value) => setFilters({ genreId: value ? Number(value) : undefined })}>
@@ -39,35 +44,6 @@ export function DiscoveryFilters() {
           </SelectContent>
         </SelectTrigger>
       </Select>
-
-      <Input
-        type="number"
-        placeholder="Ano"
-        min={1900}
-        max={new Date().getFullYear()}
-        value={filters.year ?? ''}
-        onChange={(e) =>
-          setFilters({
-            year: e.target.value ? Number(e.target.value) : undefined,
-          })
-        }
-        className="w-24"
-      />
-
-      <Input
-        type="number"
-        placeholder="Nota min."
-        min={0}
-        max={10}
-        step={0.5}
-        value={filters.minRating ?? ''}
-        onChange={(e) =>
-          setFilters({
-            minRating: e.target.value ? Number(e.target.value) : undefined,
-          })
-        }
-        className="w-28"
-      />
 
       {hasFilters && (
         <Button variant="ghost" size="sm" onClick={resetFilters}>

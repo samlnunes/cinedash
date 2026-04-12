@@ -1,4 +1,4 @@
-import type { WatchProvider, WatchProviderCountry } from '@/entities/movie'
+import type { WatchProviderCountry } from '@/entities/movie'
 
 const IMAGE_BASE = import.meta.env.VITE_TMDB_IMAGE_BASE
 
@@ -6,36 +6,19 @@ interface MovieWatchProvidersProps {
   providers: WatchProviderCountry
 }
 
-function ProviderList({ items, label }: { items: WatchProvider[]; label: string }) {
-  if (items.length === 0) return null
-
-  return (
-    <div className="space-y-2">
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <div className="flex flex-wrap gap-2">
-        {items.map((provider) => (
-          <a
-            key={provider.provider_id}
-            href={undefined}
-            title={provider.provider_name}
-            className="group relative"
-          >
-            <img
-              src={`${IMAGE_BASE}/w92${provider.logo_path}`}
-              alt={provider.provider_name}
-              className="size-10 rounded-lg object-cover ring-1 ring-border transition-transform group-hover:scale-110"
-            />
-          </a>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 export function MovieWatchProviders({ providers }: MovieWatchProvidersProps) {
-  const hasAny = providers.flatrate?.length || providers.rent?.length || providers.buy?.length
+  const all = [
+    ...(providers.flatrate ?? []),
+    ...(providers.rent ?? []),
+    ...(providers.buy ?? []),
+  ]
 
-  if (!hasAny) {
+  // deduplicate by provider_id
+  const unique = all.filter(
+    (p, i, arr) => arr.findIndex((x) => x.provider_id === p.provider_id) === i,
+  )
+
+  if (unique.length === 0) {
     return (
       <p className="text-sm text-muted-foreground italic">
         Sem informações de streaming para o Brasil.
@@ -44,19 +27,16 @@ export function MovieWatchProviders({ providers }: MovieWatchProvidersProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {providers.flatrate && (
-        <ProviderList items={providers.flatrate} label="Streaming" />
-      )}
-      {providers.rent && (
-        <ProviderList items={providers.rent} label="Alugar" />
-      )}
-      {providers.buy && (
-        <ProviderList items={providers.buy} label="Comprar" />
-      )}
-      <p className="text-[11px] text-muted-foreground">
-        Dados de disponibilidade por JustWatch.
-      </p>
+    <div className="flex flex-wrap gap-1.5">
+      {unique.map((provider) => (
+        <img
+          key={provider.provider_id}
+          src={`${IMAGE_BASE}/w92${provider.logo_path}`}
+          alt={provider.provider_name}
+          title={provider.provider_name}
+          className="size-9 rounded-lg object-cover ring-1 ring-border"
+        />
+      ))}
     </div>
   )
 }

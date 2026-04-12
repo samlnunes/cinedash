@@ -1,7 +1,9 @@
-import { Link } from '@tanstack/react-router'
-import { Eye, X, Star } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
+import { X } from 'lucide-react'
 import { posterUrl } from '@/shared/api/tmdb/client'
 import { Button } from '@/shared/ui/button'
+import { StarRating } from '@/features/ratings'
+import { ReminderButton } from '@/features/reminders'
 import { useRemoveFromWatchlist } from '../hooks/use-watchlist'
 import type { Database } from '@/lib/database.types'
 
@@ -13,52 +15,44 @@ interface WatchlistCardProps {
 
 export function WatchlistCard({ item }: WatchlistCardProps) {
   const remove = useRemoveFromWatchlist()
+  const navigate = useNavigate()
+  const isTv = item.media_type === 'tv'
+
+  const goToDetails = () => {
+    if (isTv) {
+      navigate({ to: '/tv/$tvId', params: { tvId: String(item.tmdb_id) } })
+    } else {
+      navigate({ to: '/movie/$movieId', params: { movieId: String(item.tmdb_id) } })
+    }
+  }
 
   return (
-    <div className="flex gap-4 rounded-lg border bg-card p-4">
-      <Link
-        to="/movie/$movieId"
-        params={{ movieId: String(item.tmdb_id) }}
-      >
-        <img
-          src={posterUrl(item.poster_path, 'w185')}
-          alt={item.title}
-          className="h-28 w-20 rounded object-cover shrink-0 hover:opacity-80 transition-opacity"
-        />
-      </Link>
+    <div
+      className="flex gap-4 rounded-lg border bg-card p-4 cursor-pointer transition-colors hover:bg-accent/50 overflow-hidden"
+      onClick={goToDetails}
+    >
+      <img
+        src={posterUrl(item.poster_path, 'w185')}
+        alt={item.title}
+        className="h-28 w-20 rounded object-cover shrink-0"
+      />
       <div className="flex flex-col gap-1 min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <Link
-            to="/movie/$movieId"
-            params={{ movieId: String(item.tmdb_id) }}
-            className="font-medium truncate hover:underline"
-          >
-            {item.title}
-          </Link>
-        </div>
+        <p className="text-sm font-medium line-clamp-2">{item.title}</p>
         {item.year && (
           <p className="text-sm text-muted-foreground">{item.year}</p>
         )}
-        {item.vote_average != null && (
-          <p className="text-sm text-muted-foreground inline-flex items-center gap-1">
-            <Star className="size-3 fill-yellow-400 text-yellow-400" />
-            {item.vote_average.toFixed(1)}
-          </p>
-        )}
-        <div className="flex items-center justify-between mt-auto">
+        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          <StarRating tmdbId={item.tmdb_id} size="sm" />
+          {item.vote_average != null && (
+            <span className="text-xs text-muted-foreground">{item.vote_average.toFixed(1)}</span>
+          )}
+        </div>
+        <div className="flex items-center justify-between mt-auto" onClick={(e) => e.stopPropagation()}>
           <p className="text-xs text-muted-foreground">
             {new Date(item.added_at).toLocaleDateString('pt-BR')}
           </p>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="xs" asChild>
-              <Link
-                to="/movie/$movieId"
-                params={{ movieId: String(item.tmdb_id) }}
-              >
-                <Eye className="size-3" />
-                Detalhes
-              </Link>
-            </Button>
+            <ReminderButton tmdbId={item.tmdb_id} title={item.title} posterPath={item.poster_path} />
             <Button
               variant="ghost"
               size="xs"

@@ -26,3 +26,8 @@ async function bootstrap() {
 }
 
 bootstrap()
+
+// Register service worker for PWA
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  navigator.serviceWorker.register('/sw.js')
+}

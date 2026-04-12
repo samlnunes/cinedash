@@ -48,7 +48,7 @@ describe('useAuthStore', () => {
 
   it('é admin quando profile.role é admin', () => {
     useAuthStore.setState({
-      profile: { id: '123', display_name: 'Admin', role: 'admin', avatar_url: null, created_at: '' },
+      profile: { id: '123', display_name: 'Admin', role: 'admin', avatar_url: null, jellyfin_username: null, share_token: null, created_at: '' },
     })
     expect(useAuthStore.getState().isAdmin()).toBe(true)
   })

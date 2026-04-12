@@ -96,3 +96,33 @@ export interface WatchProvidersResponse {
   id: number
   results: Record<string, WatchProviderCountry>
 }
+
+export interface TvShow {
+  id: number
+  name: string
+  overview: string
+  poster_path: string | null
+  backdrop_path: string | null
+  first_air_date: string
+  vote_average: number
+  vote_count: number
+  genre_ids: number[]
+  original_language: string
+}
+
+export interface TvShowDetails {
+  id: number
+  name: string
+  overview: string
+  tagline: string | null
+  poster_path: string | null
+  backdrop_path: string | null
+  first_air_date: string
+  vote_average: number
+  vote_count: number
+  genres: Genre[]
+  number_of_seasons: number
+  number_of_episodes: number
+  status: string
+  original_language: string
+}

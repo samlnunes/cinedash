@@ -1,18 +1,16 @@
 import { useState } from "react";
-import { Inbox } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Inbox, Clock, CheckCircle, Download, Users, CalendarDays } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { posterUrl } from "@/shared/api/tmdb/client";
-import { Badge } from "@/shared/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import {
   useAdminRequests,
   RequestFilters,
-  REQUEST_STATUS_LABELS,
-  REQUEST_STATUS_COLORS,
   type RequestStatus,
 } from "@/features/requests";
 import { AdminActions } from "@/features/requests/ui/admin-actions";
-import { JellyfinBadge } from "@/features/jellyfin";
+import { VoteButton } from "@/features/requests/ui/vote-button";
+import { useAdminStats } from "@/features/requests/hooks/use-admin-stats";
 
 export function AdminRequestsDashboard() {
   const [statusFilter, setStatusFilter] = useState<RequestStatus | "all">(
@@ -21,6 +19,7 @@ export function AdminRequestsDashboard() {
   const { data: requests, isLoading } = useAdminRequests(
     statusFilter === "all" ? undefined : statusFilter,
   );
+  const { data: stats } = useAdminStats();
 
   return (
     <div className="space-y-6">
@@ -33,6 +32,16 @@ export function AdminRequestsDashboard() {
         </div>
         <RequestFilters value={statusFilter} onChange={setStatusFilter} />
       </div>
+
+      {stats && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <StatCard icon={Clock} label="Pendentes" value={stats.pending} color="text-yellow-500" />
+          <StatCard icon={CheckCircle} label="Aprovados" value={stats.approved} color="text-green-500" />
+          <StatCard icon={Download} label="Baixando" value={stats.downloading} color="text-blue-500" />
+          <StatCard icon={Users} label="Usuários" value={stats.users} color="text-purple-500" />
+          <StatCard icon={CalendarDays} label="Este mês" value={stats.thisMonth} color="text-orange-500" />
+        </div>
+      )}
 
       {isLoading && (
         <div className="space-y-4">
@@ -55,82 +64,86 @@ export function AdminRequestsDashboard() {
       )}
 
       {requests && requests.length > 0 && (
-        <div className="space-y-3">
-          {requests.map((request) => (
-            <div
-              key={request.id}
-              className="rounded-lg border bg-card p-3 sm:p-4"
-            >
-              <div className="flex gap-3 sm:gap-4">
-                <Link
-                  to="/movie/$movieId"
-                  params={{ movieId: String(request.tmdb_id) }}
-                  className="shrink-0"
-                >
-                  <img
-                    src={posterUrl(request.poster_path, "w185")}
-                    alt={request.title}
-                    className="h-24 w-16 sm:h-20 sm:w-14 rounded object-cover transition-opacity hover:opacity-80"
-                  />
-                </Link>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="flex items-baseline gap-1.5">
-                        <Link
-                          to="/movie/$movieId"
-                          params={{ movieId: String(request.tmdb_id) }}
-                          className="font-medium truncate hover:underline"
-                        >
-                          {request.title}
-                        </Link>
-                        {request.year && (
-                          <span className="text-sm text-muted-foreground shrink-0">
-                            ({request.year})
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-1.5 mt-0.5">
-                        <JellyfinBadge tmdbId={request.tmdb_id} />
-                      </div>
-                      {request.note && (
-                        <p className="text-sm text-muted-foreground truncate mt-0.5">
-                          {request.note}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        {(request as any).profiles && (
-                          <>
-                            <Avatar className="size-4">
-                              <AvatarImage src={(request as any).profiles.avatar_url ?? undefined} />
-                              <AvatarFallback className="text-[8px]">
-                                {((request as any).profiles.display_name ?? '?')[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="text-xs text-muted-foreground">
-                              {(request as any).profiles.display_name}
-                            </span>
-                            <span className="text-xs text-muted-foreground">·</span>
-                          </>
-                        )}
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(request.created_at).toLocaleDateString("pt-BR")}
-                        </span>
-                      </div>
-                    </div>
-                    <Badge className={`shrink-0 ${REQUEST_STATUS_COLORS[request.status]}`}>
-                      {REQUEST_STATUS_LABELS[request.status]}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-end mt-2 sm:mt-0">
-                    <AdminActions request={request} />
-                  </div>
-                </div>
+        <AdminRequestList requests={requests} />
+      )}
+    </div>
+  );
+}
+
+function AdminRequestList({ requests }: { requests: any[] }) {
+  const navigate = useNavigate();
+
+  return (
+    <div className="space-y-3">
+      {requests.map((request) => {
+        const isTv = request.media_type === 'tv';
+        const goToDetails = () => {
+          if (isTv) {
+            navigate({ to: '/tv/$tvId', params: { tvId: String(request.tmdb_id) } });
+          } else {
+            navigate({ to: '/movie/$movieId', params: { movieId: String(request.tmdb_id) } });
+          }
+        };
+        const profile = (request as any).profiles;
+
+        return (
+          <div
+            key={request.id}
+            className="flex gap-3 rounded-lg border bg-card p-3 cursor-pointer transition-colors hover:bg-accent/50 overflow-hidden"
+            onClick={goToDetails}
+          >
+            <img
+              src={posterUrl(request.poster_path, "w185")}
+              alt={request.title}
+              className="h-24 w-16 rounded object-cover shrink-0"
+            />
+            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+              <p className="text-sm font-medium line-clamp-2">{request.title}</p>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {profile && (
+                  <>
+                    <Avatar className="size-3.5">
+                      <AvatarImage src={profile.avatar_url ?? undefined} />
+                      <AvatarFallback className="text-[7px]">
+                        {(profile.display_name ?? '?')[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="truncate max-w-[80px]">{profile.display_name}</span>
+                    <span>·</span>
+                  </>
+                )}
+                <span>{new Date(request.created_at).toLocaleDateString("pt-BR")}</span>
+              </div>
+              <div className="flex items-center justify-between mt-auto" onClick={(e) => e.stopPropagation()}>
+                <VoteButton requestId={request.id} />
+                <AdminActions request={request} />
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  color,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  value: number
+  color: string
+}) {
+  return (
+    <div className="rounded-lg border bg-card p-4">
+      <div className="flex items-center gap-2">
+        <Icon className={`size-4 ${color}`} />
+        <span className="text-sm text-muted-foreground">{label}</span>
+      </div>
+      <p className="text-2xl font-bold mt-1">{value}</p>
     </div>
   );
 }

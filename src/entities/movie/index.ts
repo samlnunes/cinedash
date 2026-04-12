@@ -1,5 +1,6 @@
 export { MovieCard } from './ui/movie-card'
 export { MovieCardSkeleton } from './ui/movie-card-skeleton'
+export { TvCard } from './ui/tv-card'
 
 export {
   getTrendingMovies,
@@ -27,6 +28,8 @@ export type {
   WatchProvider,
   WatchProviderCountry,
   WatchProvidersResponse,
+  TvShow,
+  TvShowDetails,
 } from './model/movie.types'
 
 export { movieKeys, movieQueries } from './api/movie.queries'

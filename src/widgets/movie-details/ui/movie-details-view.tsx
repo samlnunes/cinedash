@@ -4,12 +4,14 @@ import {
   BookmarkPlus,
   Calendar,
   Clock,
+  Play,
   Plus,
   Star,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/shared/ui/button'
 import { posterUrl } from '@/shared/api/tmdb/client'
+import { DetailsSkeleton } from '@/shared/ui/details-skeleton'
 import type { Movie } from '@/entities/movie'
 import {
   useMovieDetailsQuery,
@@ -19,7 +21,8 @@ import {
 } from '@/features/movie-details'
 import { useIsInWatchlist, useToggleWatchlist } from '@/features/watchlist'
 import { useHasRequested, RequestModal, REQUEST_STATUS_LABELS } from '@/features/requests'
-import { JellyfinBadge } from '@/features/jellyfin'
+import { JellyfinBadge, useJellyfinAvailability } from '@/features/jellyfin'
+import { StarRating } from '@/features/ratings'
 import { Badge } from '@/shared/ui/badge'
 
 interface MovieDetailsViewProps {
@@ -80,14 +83,8 @@ export function MovieDetailsView({ movieId }: MovieDetailsViewProps) {
         rating={detail.vote_average}
         genreNames={genreNames}
         movie={movieForWatchlist}
+        watchProviders={watchProviders ?? undefined}
       />
-
-      {watchProviders && (
-        <section className="mt-8 space-y-3">
-          <h2 className="text-xl font-semibold">Onde assistir</h2>
-          <MovieWatchProviders providers={watchProviders} />
-        </section>
-      )}
 
       <section className="mt-8 space-y-3">
         <h2 className="text-xl font-semibold">Elenco</h2>
@@ -113,6 +110,7 @@ function HeroSection({
   rating,
   genreNames,
   movie,
+  watchProviders,
 }: {
   title: string
   tagline: string | null
@@ -124,10 +122,12 @@ function HeroSection({
   rating: number
   genreNames: string
   movie: Movie
+  watchProviders?: import('@/entities/movie').WatchProviderCountry
 }) {
   const { toggle, isPending: watchlistPending } = useToggleWatchlist()
   const inList = useIsInWatchlist(movie.id)
   const { data: existing } = useHasRequested(movie.id)
+  const { data: jellyfin } = useJellyfinAvailability(movie.id)
   const [requestModalOpen, setRequestModalOpen] = useState(false)
 
   return (
@@ -224,7 +224,14 @@ function HeroSection({
                 </>
               )}
             </Button>
-            {existing ? (
+            {jellyfin?.available && jellyfin.jellyfin_id ? (
+              <Button variant="outline" size="sm" className="text-green-500 border-green-500/30 hover:text-green-400" asChild>
+                <a href={`${import.meta.env.VITE_JELLYFIN_URL}/web/index.html#!/details?id=${jellyfin.jellyfin_id}`} target="_blank" rel="noopener noreferrer">
+                  <Play className="size-4" />
+                  Assistir
+                </a>
+              </Button>
+            ) : existing ? (
               <Button variant="outline" size="sm" disabled>
                 {REQUEST_STATUS_LABELS[existing.status as keyof typeof REQUEST_STATUS_LABELS]}
               </Button>
@@ -240,52 +247,15 @@ function HeroSection({
               onOpenChange={setRequestModalOpen}
             />
           </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
-function DetailsSkeleton() {
-  return (
-    <div>
-      <div className="relative -mt-6 left-1/2 -ml-[50vw] w-screen h-44 animate-pulse bg-muted sm:h-56" />
-
-      <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:gap-8">
-        <div className="-mt-24 aspect-[2/3] w-48 shrink-0 animate-pulse rounded-lg bg-muted ring-4 ring-background sm:w-56 md:w-64" />
-        <div className="flex flex-1 flex-col gap-4 pt-2 sm:pt-4">
-          <div className="h-8 w-3/4 animate-pulse rounded bg-muted" />
-          <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
-          <div className="flex gap-2">
-            <div className="h-6 w-16 animate-pulse rounded-full bg-muted" />
-            <div className="h-6 w-20 animate-pulse rounded-full bg-muted" />
-            <div className="h-6 w-14 animate-pulse rounded-full bg-muted" />
-          </div>
-          <div className="space-y-2">
-            <div className="h-3 w-full animate-pulse rounded bg-muted" />
-            <div className="h-3 w-full animate-pulse rounded bg-muted" />
-            <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
-          </div>
-          <div className="h-9 w-44 animate-pulse rounded-md bg-muted" />
-        </div>
-      </div>
-
-      <div className="mt-8 space-y-3">
-        <div className="h-6 w-24 animate-pulse rounded bg-muted" />
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
-          {Array.from({ length: 6 }, (_, i) => (
-            <div key={i} className="flex flex-col items-center gap-1.5">
-              <div className="size-20 animate-pulse rounded-full bg-muted" />
-              <div className="h-3 w-16 animate-pulse rounded bg-muted" />
-              <div className="h-2.5 w-12 animate-pulse rounded bg-muted" />
+          <div className="flex items-center gap-4">
+            {watchProviders && <MovieWatchProviders providers={watchProviders} />}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Sua nota:</span>
+              <StarRating tmdbId={movie.id} />
             </div>
-          ))}
+          </div>
         </div>
-      </div>
-
-      <div className="mt-8 space-y-3">
-        <div className="h-6 w-24 animate-pulse rounded bg-muted" />
-        <div className="aspect-video animate-pulse rounded-lg bg-muted" />
       </div>
     </div>
   )
