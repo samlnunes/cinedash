@@ -94,18 +94,17 @@ export function ProfilePage() {
       <div className="max-w-sm space-y-6">
         {/* Avatar */}
         <div className="flex flex-col items-center gap-3">
-          <div className="relative">
-            <Avatar className="size-24">
+          <div
+            className="relative cursor-pointer"
+            onClick={() => fileRef.current?.click()}
+          >
+            <Avatar className="size-24 hover:opacity-80 transition-opacity">
               <AvatarImage src={avatarUrl} />
               <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
             </Avatar>
-            <button
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
-              className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow hover:bg-primary/90"
-            >
+            <div className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
               <Camera className="size-4" />
-            </button>
+            </div>
             <input
               ref={fileRef}
               type="file"

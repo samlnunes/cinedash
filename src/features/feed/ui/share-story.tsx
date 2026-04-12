@@ -53,11 +53,19 @@ async function generateStoryImage({
   ctx.fillStyle = "#0a0a0a";
   ctx.fillRect(0, 0, W, H);
 
-  // Poster
+  // Calculate total content height to center everything
   const posterW = 600;
   const posterH = 900;
+  const avatarOverlap = 40;
+  const titleH = 60;
+  const starsH = rating ? 56 : 0;
+  const bodyH = body ? Math.min(Math.ceil(body.length / 40), 4) * 44 + 30 : 0;
+  const brandingH = 70;
+  const totalH = avatarOverlap + posterH + titleH + starsH + bodyH + brandingH;
+  const startY = Math.max(80, (H - totalH) / 2);
+
   const posterX = (W - posterW) / 2;
-  const posterY = 180;
+  const posterY = startY + avatarOverlap;
 
   if (posterPath) {
     try {

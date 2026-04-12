@@ -334,7 +334,7 @@ function CommentsSection({
         </div>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <Input
           placeholder={
             replyTo ? `Responder ${replyTo.name}...` : "Escrever comentário..."
@@ -342,11 +342,21 @@ function CommentsSection({
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          onFocus={(e) => setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)}
-          className="h-8 text-sm"
+          onFocus={(e) =>
+            setTimeout(
+              () =>
+                e.target.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                }),
+              300,
+            )
+          }
+          className="h-9 text-base sm:text-sm"
         />
         <Button
           size="sm"
+          className="h-9"
           onClick={handleSubmit}
           disabled={!text.trim() || addComment.isPending}
         >
