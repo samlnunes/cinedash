@@ -19,6 +19,7 @@ import {
 } from '@/features/movie-details'
 import { useIsInWatchlist, useToggleWatchlist } from '@/features/watchlist'
 import { useHasRequested, RequestModal, REQUEST_STATUS_LABELS } from '@/features/requests'
+import { JellyfinBadge } from '@/features/jellyfin'
 import { Badge } from '@/shared/ui/badge'
 
 interface MovieDetailsViewProps {
@@ -182,6 +183,7 @@ function HeroSection({
 
           {genreNames && (
             <div className="flex flex-wrap gap-1.5">
+              <JellyfinBadge tmdbId={movie.id} />
               {genreNames.split(', ').map((name) => (
                 <Badge
                   key={name}

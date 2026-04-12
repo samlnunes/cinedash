@@ -12,6 +12,7 @@ import {
   type RequestStatus,
 } from "@/features/requests";
 import { AdminActions } from "@/features/requests/ui/admin-actions";
+import { JellyfinBadge } from "@/features/jellyfin";
 
 export function AdminRequestsDashboard() {
   const [statusFilter, setStatusFilter] = useState<RequestStatus | "all">(
@@ -88,6 +89,9 @@ export function AdminRequestsDashboard() {
                             ({request.year})
                           </span>
                         )}
+                      </div>
+                      <div className="flex gap-1.5 mt-0.5">
+                        <JellyfinBadge tmdbId={request.tmdb_id} />
                       </div>
                       {request.note && (
                         <p className="text-sm text-muted-foreground truncate mt-0.5">
