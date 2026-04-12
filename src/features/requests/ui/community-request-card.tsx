@@ -64,7 +64,11 @@ export function CommunityRequestCard({ group }: { group: GroupedCommunityRequest
   return (
     <div
       className="flex gap-4 rounded-lg border bg-card p-4 cursor-pointer transition-colors hover:bg-accent/50 overflow-hidden"
-      onClick={goToDetails}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest('[data-no-navigate]') || !e.currentTarget.contains(target)) return
+        goToDetails()
+      }}
     >
       <img
         src={posterUrl(group.poster_path, 'w185')}
@@ -81,7 +85,7 @@ export function CommunityRequestCard({ group }: { group: GroupedCommunityRequest
             {group.notes[0]}
           </p>
         )}
-        <div className="flex items-center justify-between mt-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mt-auto" data-no-navigate>
           <div className="flex items-center gap-1">
             <div className="flex -space-x-1.5">
               {group.profiles.slice(0, 5).map((p, i) => (
