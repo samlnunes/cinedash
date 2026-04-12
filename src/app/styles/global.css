@@ -139,6 +139,38 @@ code {
   }
 }
 
+.reactEasyCrop_Container {
+  border: none !important;
+  outline: none !important;
+  isolation: isolate;
+}
+
+.reactEasyCrop_Image,
+.reactEasyCrop_Video {
+  border: none !important;
+  outline: none !important;
+}
+
+.reactEasyCrop_CropArea {
+  border: none !important;
+  outline: none !important;
+  box-shadow: 0 0 0 9999px var(--cropper-overlay), inset 0 0 0 2px var(--cropper-overlay) !important;
+  z-index: 1;
+}
+
+.reactEasyCrop_CropArea::before,
+.reactEasyCrop_CropArea::after {
+  display: none !important;
+}
+
+:root {
+  --cropper-overlay: oklch(1 0 0);
+}
+
+.dark {
+  --cropper-overlay: oklch(0.145 0 0);
+}
+
 @layer utilities {
   .scrollbar-none {
     -ms-overflow-style: none;
