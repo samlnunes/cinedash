@@ -6,6 +6,7 @@ import {
   Film,
   BookMarked,
   ClipboardList,
+  MessageSquare,
   Shield,
   Moon,
   Sun,
@@ -62,6 +63,7 @@ export function ProtectedHeader() {
     { to: "/dashboard" as const, icon: Film, label: "Dashboard" },
     { to: "/watchlist" as const, icon: BookMarked, label: "Minha Lista" },
     { to: "/requests" as const, icon: ClipboardList, label: "Pedidos" },
+    { to: "/feed" as const, icon: MessageSquare, label: "Feed" },
     ...(isAdmin()
       ? [{ to: "/admin/requests" as const, icon: Shield, label: "Admin" }]
       : []),
@@ -159,6 +161,12 @@ export function ProtectedHeader() {
                 Pedidos
               </Link>
             </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/feed">
+                <MessageSquare className="size-4" />
+                Feed
+              </Link>
+            </Button>
             {isAdmin() && (
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/admin/requests">
@@ -171,37 +179,41 @@ export function ProtectedHeader() {
         </div>
 
         <div className="flex items-center gap-1">
-        <NotificationBell />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <Avatar className="size-8 cursor-pointer">
-                <AvatarImage src={avatarUrl} alt={displayName} />
-                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-              </Avatar>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <div className="px-2 py-1.5">
-              <p className="text-sm font-medium">{displayName}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={toggle}>
-              {effective === "dark" ? (
-                <Sun className="size-4" />
-              ) : (
-                <Moon className="size-4" />
-              )}
-              {effective === "dark" ? "Tema claro" : "Tema escuro"}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="size-4" />
-              Sair
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <NotificationBell />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <Avatar className="size-8 cursor-pointer">
+                  <AvatarImage src={avatarUrl} alt={displayName} />
+                  <AvatarFallback className="text-xs">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}>
+                <div>
+                  <p className="text-sm font-medium">{displayName}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={toggle}>
+                {effective === "dark" ? (
+                  <Sun className="size-4" />
+                ) : (
+                  <Moon className="size-4" />
+                )}
+                {effective === "dark" ? "Tema claro" : "Tema escuro"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="size-4" />
+                Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

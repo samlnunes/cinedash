@@ -139,6 +139,131 @@ export interface Database {
           },
         ]
       }
+      posts: {
+        Row: {
+          id: string
+          user_id: string
+          tmdb_id: number
+          media_type: string
+          title: string
+          poster_path: string | null
+          rating: number | null
+          body: string | null
+          spoiler: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          tmdb_id: number
+          media_type?: string
+          title: string
+          poster_path?: string | null
+          rating?: number | null
+          body?: string | null
+          spoiler?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          tmdb_id?: number
+          media_type?: string
+          title?: string
+          poster_path?: string | null
+          rating?: number | null
+          body?: string | null
+          spoiler?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'posts_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          id: string
+          post_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          user_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'post_likes_post_id_fkey'
+            columns: ['post_id']
+            isOneToOne: false
+            referencedRelation: 'posts'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'post_likes_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      post_comments: {
+        Row: {
+          id: string
+          post_id: string
+          user_id: string
+          body: string
+          parent_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          user_id: string
+          body: string
+          parent_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          user_id?: string
+          body?: string
+          parent_id?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'post_comments_post_id_fkey'
+            columns: ['post_id']
+            isOneToOne: false
+            referencedRelation: 'posts'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'post_comments_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       reminders: {
         Row: {
           id: string

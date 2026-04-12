@@ -17,6 +17,8 @@ import { Route as ProtectedWatchlistRouteImport } from './pages/_protected/watch
 import { Route as ProtectedUpcomingRouteImport } from './pages/_protected/upcoming'
 import { Route as ProtectedSeriesRouteImport } from './pages/_protected/series'
 import { Route as ProtectedRequestsRouteImport } from './pages/_protected/requests'
+import { Route as ProtectedProfileRouteImport } from './pages/_protected/profile'
+import { Route as ProtectedFeedRouteImport } from './pages/_protected/feed'
 import { Route as ProtectedDashboardRouteImport } from './pages/_protected/dashboard'
 import { Route as ProtectedTvTvIdRouteImport } from './pages/_protected/tv.$tvId'
 import { Route as ProtectedMovieMovieIdRouteImport } from './pages/_protected/movie.$movieId'
@@ -61,6 +63,16 @@ const ProtectedRequestsRoute = ProtectedRequestsRouteImport.update({
   path: '/requests',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedProfileRoute = ProtectedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedFeedRoute = ProtectedFeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -86,6 +98,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof ProtectedDashboardRoute
+  '/feed': typeof ProtectedFeedRoute
+  '/profile': typeof ProtectedProfileRoute
   '/requests': typeof ProtectedRequestsRoute
   '/series': typeof ProtectedSeriesRoute
   '/upcoming': typeof ProtectedUpcomingRoute
@@ -99,6 +113,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof ProtectedDashboardRoute
+  '/feed': typeof ProtectedFeedRoute
+  '/profile': typeof ProtectedProfileRoute
   '/requests': typeof ProtectedRequestsRoute
   '/series': typeof ProtectedSeriesRoute
   '/upcoming': typeof ProtectedUpcomingRoute
@@ -114,6 +130,8 @@ export interface FileRoutesById {
   '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
   '/_protected/dashboard': typeof ProtectedDashboardRoute
+  '/_protected/feed': typeof ProtectedFeedRoute
+  '/_protected/profile': typeof ProtectedProfileRoute
   '/_protected/requests': typeof ProtectedRequestsRoute
   '/_protected/series': typeof ProtectedSeriesRoute
   '/_protected/upcoming': typeof ProtectedUpcomingRoute
@@ -129,6 +147,8 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/dashboard'
+    | '/feed'
+    | '/profile'
     | '/requests'
     | '/series'
     | '/upcoming'
@@ -142,6 +162,8 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/dashboard'
+    | '/feed'
+    | '/profile'
     | '/requests'
     | '/series'
     | '/upcoming'
@@ -156,6 +178,8 @@ export interface FileRouteTypes {
     | '/_protected'
     | '/login'
     | '/_protected/dashboard'
+    | '/_protected/feed'
+    | '/_protected/profile'
     | '/_protected/requests'
     | '/_protected/series'
     | '/_protected/upcoming'
@@ -231,6 +255,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedRequestsRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/profile': {
+      id: '/_protected/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProtectedProfileRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/feed': {
+      id: '/_protected/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof ProtectedFeedRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/dashboard': {
       id: '/_protected/dashboard'
       path: '/dashboard'
@@ -264,6 +302,8 @@ declare module '@tanstack/react-router' {
 
 interface ProtectedRouteChildren {
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
+  ProtectedFeedRoute: typeof ProtectedFeedRoute
+  ProtectedProfileRoute: typeof ProtectedProfileRoute
   ProtectedRequestsRoute: typeof ProtectedRequestsRoute
   ProtectedSeriesRoute: typeof ProtectedSeriesRoute
   ProtectedUpcomingRoute: typeof ProtectedUpcomingRoute
@@ -275,6 +315,8 @@ interface ProtectedRouteChildren {
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedDashboardRoute: ProtectedDashboardRoute,
+  ProtectedFeedRoute: ProtectedFeedRoute,
+  ProtectedProfileRoute: ProtectedProfileRoute,
   ProtectedRequestsRoute: ProtectedRequestsRoute,
   ProtectedSeriesRoute: ProtectedSeriesRoute,
   ProtectedUpcomingRoute: ProtectedUpcomingRoute,
