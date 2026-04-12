@@ -208,9 +208,11 @@ function RecentOnServer({ movies }: { movies: RecentJellyfinMovie[] }) {
   const tmdb = tmdbData?.[current];
 
   const goTo = useCallback(
-    (dir: 'prev' | 'next') => {
+    (dir: "prev" | "next") => {
       setCurrent((i) =>
-        dir === 'next' ? (i + 1) % movies.length : (i - 1 + movies.length) % movies.length,
+        dir === "next"
+          ? (i + 1) % movies.length
+          : (i - 1 + movies.length) % movies.length,
       );
     },
     [movies.length],
@@ -219,7 +221,7 @@ function RecentOnServer({ movies }: { movies: RecentJellyfinMovie[] }) {
   // Auto-rotate
   useEffect(() => {
     if (movies.length <= 1) return;
-    const timer = setInterval(() => goTo('next'), 6000);
+    const timer = setInterval(() => goTo("next"), 6000);
     return () => clearInterval(timer);
   }, [movies.length, goTo]);
 
@@ -237,10 +239,12 @@ function RecentOnServer({ movies }: { movies: RecentJellyfinMovie[] }) {
   return (
     <div
       className="relative left-1/2 -ml-[50vw] w-screen -mt-6 mb-2"
-      onTouchStart={(e) => { touchStart.current = e.touches[0].clientX }}
+      onTouchStart={(e) => {
+        touchStart.current = e.touches[0].clientX;
+      }}
       onTouchEnd={(e) => {
         const diff = touchStart.current - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 50) goTo(diff > 0 ? 'next' : 'prev');
+        if (Math.abs(diff) > 50) goTo(diff > 0 ? "next" : "prev");
       }}
     >
       {/* Backdrop */}
@@ -349,7 +353,6 @@ function MovieLogo({ tmdbId, title }: { tmdbId: string; title: string }) {
         },
       );
       const data = await res.json();
-      console.log("data", data);
       const logo =
         data.logos?.find((l: any) => l.iso_639_1 === "pt") ??
         data.logos?.find((l: any) => l.iso_639_1 === "en") ??

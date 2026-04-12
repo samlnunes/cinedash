@@ -8,9 +8,16 @@ export const voteKeys = {
   byRequest: (requestId: string) => [...voteKeys.all, requestId] as const,
 }
 
+interface VoteUser {
+  user_id: string
+  display_name: string
+  avatar_url: string | null
+}
+
 interface VoteData {
   count: number
   hasVoted: boolean
+  users: VoteUser[]
 }
 
 export function useRequestVotes(requestId: string) {
@@ -21,7 +28,7 @@ export function useRequestVotes(requestId: string) {
     queryFn: async (): Promise<VoteData> => {
       const { data, error } = await supabase
         .from('request_votes')
-        .select('user_id')
+        .select('user_id, profiles(display_name, avatar_url)')
         .eq('request_id', requestId)
 
       if (error) throw error
@@ -29,6 +36,11 @@ export function useRequestVotes(requestId: string) {
       return {
         count: data.length,
         hasVoted: data.some((v) => v.user_id === userId),
+        users: data.map((v) => ({
+          user_id: v.user_id,
+          display_name: (v.profiles as any)?.display_name ?? 'Usuário',
+          avatar_url: (v.profiles as any)?.avatar_url ?? null,
+        })),
       }
     },
     enabled: !!userId,

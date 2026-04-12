@@ -23,6 +23,7 @@ export function useFeed() {
     initialPageParam: 0,
     getNextPageParam: (lastPage, _, lastPageParam) =>
       lastPage.length === 20 ? lastPageParam + 20 : undefined,
+    staleTime: 1000 * 30,
   })
 }
 
@@ -85,6 +86,7 @@ export function useComments(postId: string) {
       if (error) throw error
       return data
     },
+    staleTime: 1000 * 15,
   })
 }
 
@@ -116,13 +118,18 @@ export function usePostLikes(postId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('post_likes')
-        .select('user_id')
+        .select('user_id, profiles(display_name, avatar_url)')
         .eq('post_id', postId)
 
       if (error) throw error
       return {
         count: data.length,
         hasLiked: data.some((l) => l.user_id === userId),
+        users: data.map((l) => ({
+          user_id: l.user_id,
+          display_name: (l.profiles as any)?.display_name ?? 'Usuário',
+          avatar_url: (l.profiles as any)?.avatar_url ?? null,
+        })),
       }
     },
     enabled: !!userId,
