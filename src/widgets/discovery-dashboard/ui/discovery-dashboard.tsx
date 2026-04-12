@@ -202,17 +202,26 @@ function RecentOnServer({ movies }: { movies: RecentJellyfinMovie[] }) {
   const tmdbIds = movies.map((m) => m.tmdb_id);
   const { data: tmdbData } = useCarouselTmdbData(tmdbIds);
   const IMAGE_BASE = import.meta.env.VITE_TMDB_IMAGE_BASE;
+  const touchStart = useRef(0);
 
   const movie = movies[current];
   const tmdb = tmdbData?.[current];
 
+  const goTo = useCallback(
+    (dir: 'prev' | 'next') => {
+      setCurrent((i) =>
+        dir === 'next' ? (i + 1) % movies.length : (i - 1 + movies.length) % movies.length,
+      );
+    },
+    [movies.length],
+  );
+
+  // Auto-rotate
   useEffect(() => {
     if (movies.length <= 1) return;
-    const timer = setInterval(() => {
-      setCurrent((i) => (i + 1) % movies.length);
-    }, 6000);
+    const timer = setInterval(() => goTo('next'), 6000);
     return () => clearInterval(timer);
-  }, [movies.length]);
+  }, [movies.length, goTo]);
 
   if (!movie) return null;
 
@@ -226,7 +235,14 @@ function RecentOnServer({ movies }: { movies: RecentJellyfinMovie[] }) {
   const genres = tmdb?.genres?.slice(0, 3);
 
   return (
-    <div className="relative left-1/2 -ml-[50vw] w-screen -mt-6 mb-2">
+    <div
+      className="relative left-1/2 -ml-[50vw] w-screen -mt-6 mb-2"
+      onTouchStart={(e) => { touchStart.current = e.touches[0].clientX }}
+      onTouchEnd={(e) => {
+        const diff = touchStart.current - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) goTo(diff > 0 ? 'next' : 'prev');
+      }}
+    >
       {/* Backdrop */}
       <div className="relative h-48 sm:h-72 md:h-96 overflow-hidden">
         <img
