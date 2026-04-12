@@ -119,10 +119,17 @@ export function PostCard({ post }: PostCardProps) {
           {post.rating && (
             <div className="flex items-center gap-0.5 mt-1">
               {[1, 2, 3, 4, 5].map((v) => (
-                <Star
-                  key={v}
-                  className={`size-4 ${v <= post.rating! ? "fill-yellow-400 text-yellow-400" : "text-white/30"}`}
-                />
+                <div key={v} className="relative">
+                  <Star className="size-4 text-white/30" />
+                  {post.rating! >= v - 0.5 && (
+                    <div
+                      className="absolute inset-0 overflow-hidden"
+                      style={{ width: post.rating! >= v ? "100%" : "50%" }}
+                    >
+                      <Star className="size-4 fill-yellow-400 text-yellow-400" />
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           )}

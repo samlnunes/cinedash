@@ -146,14 +146,30 @@ async function generateStoryImage({
     let starX = (W - totalW) / 2;
 
     for (let i = 1; i <= 5; i++) {
-      ctx.fillStyle = i <= rating ? "#facc15" : "#333333";
-      drawStar(
-        ctx,
-        starX + starSize / 2,
-        currentY + starSize / 2,
-        starSize / 2,
-        starSize / 4,
-      );
+      const cx = starX + starSize / 2;
+      const cy = currentY + starSize / 2;
+      const outerR = starSize / 2;
+      const innerR = starSize / 4;
+
+      // Draw empty star background
+      ctx.fillStyle = "#333333";
+      drawStar(ctx, cx, cy, outerR, innerR);
+
+      if (rating >= i) {
+        // Full star
+        ctx.fillStyle = "#facc15";
+        drawStar(ctx, cx, cy, outerR, innerR);
+      } else if (rating >= i - 0.5) {
+        // Half star - clip left half
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(starX, currentY, starSize / 2, starSize);
+        ctx.clip();
+        ctx.fillStyle = "#facc15";
+        drawStar(ctx, cx, cy, outerR, innerR);
+        ctx.restore();
+      }
+
       starX += starSize + gap;
     }
     currentY += starSize + 20;

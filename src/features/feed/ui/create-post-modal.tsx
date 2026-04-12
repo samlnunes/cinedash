@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Star } from "lucide-react";
 import { Checkbox } from "@/shared/ui/checkbox";
@@ -43,9 +43,21 @@ export function CreatePostModal({
     setMentionedIds((prev) => new Set(prev).add(id));
   }, []);
 
+  const starsRef = useRef<HTMLDivElement>(null);
   const title = movie.name ?? movie.title;
   const mediaType = movie.media_type ?? "movie";
   const displayRating = hoverRating || rating;
+
+  const getValueFromTouch = useCallback((clientX: number) => {
+    if (!starsRef.current) return 0;
+    const rect = starsRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const starWidth = rect.width / 5;
+    const starIndex = Math.floor(x / starWidth);
+    const withinStar = x - starIndex * starWidth;
+    const isLeftHalf = withinStar < starWidth / 2;
+    return Math.max(0.5, Math.min(5, starIndex + (isLeftHalf ? 0.5 : 1)));
+  }, []);
 
   const handleSubmit = () => {
     createPost.mutate(
@@ -74,7 +86,10 @@ export function CreatePostModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent
+        className="sm:max-w-md"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Compartilhar no feed</DialogTitle>
         </DialogHeader>
@@ -88,25 +103,48 @@ export function CreatePostModal({
           <div className="min-w-0">
             <p className="font-medium line-clamp-2">{title}</p>
             <div
-              className="flex gap-0.5 mt-2"
+              ref={starsRef}
+              className="flex gap-0.5 mt-2 touch-none"
               onMouseLeave={() => setHoverRating(0)}
+              onTouchMove={(e) => setHoverRating(getValueFromTouch(e.touches[0].clientX))}
+              onTouchEnd={() => {
+                if (hoverRating > 0) {
+                  setRating(hoverRating === rating ? 0 : hoverRating);
+                  setHoverRating(0);
+                }
+              }}
             >
-              {[1, 2, 3, 4, 5].map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onMouseEnter={() => setHoverRating(v)}
-                  onClick={() => setRating(v === rating ? 0 : v)}
-                >
-                  <Star
-                    className={`size-5 transition-colors ${
-                      v <= displayRating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-muted-foreground/30"
-                    }`}
-                  />
-                </button>
-              ))}
+              {[1, 2, 3, 4, 5].map((v) => {
+                const getVal = (e: React.MouseEvent) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  return e.clientX - rect.left < rect.width / 2 ? v - 0.5 : v;
+                };
+                return (
+                  <button
+                    key={v}
+                    type="button"
+                    onMouseMove={(e) => setHoverRating(getVal(e))}
+                    onClick={(e) => {
+                      const val = getVal(e);
+                      setRating(val === rating ? 0 : val);
+                    }}
+                  >
+                    <div className="relative">
+                      <Star className="size-5 text-muted-foreground/30" />
+                      {displayRating >= v - 0.5 && (
+                        <div
+                          className="absolute inset-0 overflow-hidden"
+                          style={{
+                            width: displayRating >= v ? "100%" : "50%",
+                          }}
+                        >
+                          <Star className="size-5 fill-yellow-400 text-yellow-400" />
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
