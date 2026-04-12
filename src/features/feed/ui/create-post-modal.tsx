@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Star } from "lucide-react";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { Button } from "@/shared/ui/button";
-import { Textarea } from "@/shared/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,7 @@ import {
 } from "@/shared/ui/dialog";
 import { posterUrl } from "@/shared/api/tmdb/client";
 import { useCreatePost } from "../hooks/use-feed";
+import { MentionTextarea } from "./mention-input";
 
 interface CreatePostModalProps {
   open: boolean;
@@ -35,8 +35,13 @@ export function CreatePostModal({
   const [hoverRating, setHoverRating] = useState(0);
   const [body, setBody] = useState("");
   const [spoiler, setSpoiler] = useState(false);
+  const [mentionedIds, setMentionedIds] = useState<Set<string>>(new Set());
   const createPost = useCreatePost();
   const navigate = useNavigate();
+
+  const handleMention = useCallback((id: string) => {
+    setMentionedIds((prev) => new Set(prev).add(id));
+  }, []);
 
   const title = movie.name ?? movie.title;
   const mediaType = movie.media_type ?? "movie";
@@ -52,12 +57,14 @@ export function CreatePostModal({
         rating: rating || null,
         body: body.trim(),
         spoiler,
+        mentionedUserIds: [...mentionedIds],
       },
       {
         onSuccess: () => {
           setRating(0);
           setBody("");
           setSpoiler(false);
+          setMentionedIds(new Set());
           onOpenChange(false);
           navigate({ to: "/feed" });
         },
@@ -104,10 +111,11 @@ export function CreatePostModal({
           </div>
         </div>
 
-        <Textarea
+        <MentionTextarea
           placeholder="O que achou do filme? (opcional)"
           value={body}
-          onChange={(e) => setBody(e.target.value)}
+          onChange={setBody}
+          onMention={handleMention}
           rows={3}
         />
 

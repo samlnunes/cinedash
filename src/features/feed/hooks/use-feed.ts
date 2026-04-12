@@ -5,6 +5,7 @@ import { useAuthStore } from '@/features/auth'
 const feedKeys = {
   all: ['feed'] as const,
   comments: (postId: string) => ['feed', 'comments', postId] as const,
+  profiles: ['profiles', 'all'] as const,
 }
 
 export function useFeed() {
@@ -40,6 +41,7 @@ export function useCreatePost() {
       rating: number | null
       body: string
       spoiler?: boolean
+      mentionedUserIds?: string[]
     }) => {
       const { error } = await supabase.from('posts').insert({
         user_id: userId!,
@@ -52,6 +54,28 @@ export function useCreatePost() {
         spoiler: post.spoiler ?? false,
       })
       if (error) throw error
+
+      if (post.mentionedUserIds?.length) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', userId!)
+          .single()
+
+        const notifications = post.mentionedUserIds
+          .filter((id) => id !== userId)
+          .map((id) => ({
+            user_id: id,
+            title: `${profile?.display_name ?? 'Alguém'} mencionou você em um post sobre ${post.title}`,
+            body: post.body ? (post.body.length > 100 ? post.body.slice(0, 100) + '...' : post.body) : null,
+            link: '/feed',
+            read: false,
+          }))
+
+        if (notifications.length > 0) {
+          await supabase.from('notifications').insert(notifications)
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: feedKeys.all })
@@ -90,12 +114,33 @@ export function useComments(postId: string) {
   })
 }
 
+export function useAllProfiles() {
+  return useQuery({
+    queryKey: feedKeys.profiles,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .order('display_name', { ascending: true })
+
+      if (error) throw error
+      return data
+    },
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
 export function useAddComment() {
   const queryClient = useQueryClient()
   const userId = useAuthStore((s) => s.user?.id)
 
   return useMutation({
-    mutationFn: async ({ postId, body, parentId }: { postId: string; body: string; parentId?: string }) => {
+    mutationFn: async ({ postId, body, parentId, mentionedUserIds }: {
+      postId: string
+      body: string
+      parentId?: string
+      mentionedUserIds?: string[]
+    }) => {
       const { error } = await supabase.from('post_comments').insert({
         post_id: postId,
         user_id: userId!,
@@ -103,6 +148,29 @@ export function useAddComment() {
         parent_id: parentId ?? null,
       })
       if (error) throw error
+
+      // Create notifications for mentioned users
+      if (mentionedUserIds?.length) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', userId!)
+          .single()
+
+        const notifications = mentionedUserIds
+          .filter((id) => id !== userId)
+          .map((id) => ({
+            user_id: id,
+            title: `${profile?.display_name ?? 'Alguém'} mencionou você em um comentário`,
+            body: body.length > 100 ? body.slice(0, 100) + '...' : body,
+            link: '/feed',
+            read: false,
+          }))
+
+        if (notifications.length > 0) {
+          await supabase.from('notifications').insert(notifications)
+        }
+      }
     },
     onSuccess: (_, { postId }) => {
       queryClient.invalidateQueries({ queryKey: feedKeys.comments(postId) })

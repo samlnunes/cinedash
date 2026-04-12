@@ -6,6 +6,7 @@ import {
   SearchX,
   BookmarkPlus,
   BookmarkMinus,
+  MessageSquare,
   Play,
   Star,
   ChevronLeft,
@@ -25,6 +26,7 @@ import {
 } from "@/features/jellyfin";
 import { useRecommendations } from "@/features/recommendations";
 import { RequestButton } from "@/features/requests";
+import { CreatePostModal } from "@/features/feed";
 import { posterUrl } from "@/shared/api/tmdb/client";
 
 const JELLYFIN_URL = import.meta.env.VITE_JELLYFIN_URL;
@@ -118,6 +120,7 @@ export function DiscoveryDashboard() {
               <MovieCard
                 key={`${(movie as any).media_type ?? "movie"}-${movie.id}`}
                 movie={movie}
+                posterOverlay={<SharePostButton movie={movie} />}
                 actions={
                   <div className="flex flex-col gap-1">
                     <WatchlistToggle movie={movie} />
@@ -160,6 +163,28 @@ function WatchlistToggle({ movie }: { movie: Movie }) {
         </>
       )}
     </Button>
+  );
+}
+
+function SharePostButton({ movie }: { movie: Movie }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button
+        variant="secondary"
+        size="icon"
+        className="size-8 rounded-full bg-black/60 hover:bg-black/80 text-white"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(true);
+        }}
+      >
+        <MessageSquare className="size-3.5" />
+      </Button>
+      <CreatePostModal movie={movie} open={open} onOpenChange={setOpen} />
+    </>
   );
 }
 
@@ -295,7 +320,7 @@ function RecentOnServer({ movies }: { movies: RecentJellyfinMovie[] }) {
               <div className="flex items-center gap-2 mt-3">
                 <Button
                   size="sm"
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 text-white"
                   asChild
                 >
                   <a

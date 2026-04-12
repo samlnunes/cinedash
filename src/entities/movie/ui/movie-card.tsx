@@ -7,9 +7,10 @@ import type { Movie } from '../model/movie.types'
 interface MovieCardProps {
   movie: Movie & { media_type?: string; name?: string; first_air_date?: string }
   actions?: ReactNode
+  posterOverlay?: ReactNode
 }
 
-export function MovieCard({ movie, actions }: MovieCardProps) {
+export function MovieCard({ movie, actions, posterOverlay }: MovieCardProps) {
   const isTv = movie.media_type === 'tv'
   const title = isTv ? (movie.name ?? movie.title) : movie.title
   const date = isTv ? (movie.first_air_date ?? movie.release_date) : movie.release_date
@@ -38,6 +39,9 @@ export function MovieCard({ movie, actions }: MovieCardProps) {
           </span>
         )}
       </Link>
+      {posterOverlay && (
+        <div className="absolute top-2 right-2 z-10">{posterOverlay}</div>
+      )}
 
       <div className="flex flex-1 flex-col gap-1 p-3">
         <h3 className="line-clamp-2 text-sm font-semibold leading-tight">

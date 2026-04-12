@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, MessageCircle, Star, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -17,12 +17,14 @@ import { useAuthStore } from "@/features/auth";
 import {
   useComments,
   useAddComment,
+  useAllProfiles,
   useDeleteComment,
   useDeletePost,
   usePostLikes,
   useTogglePostLike,
 } from "../hooks/use-feed";
 import { ShareStoryButton } from "./share-story";
+import { MentionInput } from "./mention-input";
 
 interface PostCardProps {
   post: {
@@ -284,6 +286,53 @@ interface CommentData {
   profiles: { display_name: string; avatar_url: string | null } | null;
 }
 
+function CommentBody({ text }: { text: string }) {
+  const { data: profiles } = useAllProfiles();
+  const names = (profiles?.map((p) => p.display_name) ?? []).sort(
+    (a, b) => b.length - a.length,
+  );
+
+  const parts: { text: string; mention: boolean }[] = [];
+  let remaining = text;
+
+  while (remaining.length > 0) {
+    const atIdx = remaining.indexOf("@");
+    if (atIdx === -1) {
+      parts.push({ text: remaining, mention: false });
+      break;
+    }
+
+    if (atIdx > 0) {
+      parts.push({ text: remaining.slice(0, atIdx), mention: false });
+      remaining = remaining.slice(atIdx);
+    }
+
+    const after = remaining.slice(1);
+    const matched = names.find((n) => after.startsWith(n));
+    if (matched) {
+      parts.push({ text: `@${matched}`, mention: true });
+      remaining = remaining.slice(1 + matched.length);
+    } else {
+      parts.push({ text: "@", mention: false });
+      remaining = remaining.slice(1);
+    }
+  }
+
+  return (
+    <span className="text-sm leading-relaxed">
+      {parts.map((part, i) =>
+        part.mention ? (
+          <span key={i} className="text-blue-500 font-medium">
+            {part.text}
+          </span>
+        ) : (
+          <span key={i}>{part.text}</span>
+        ),
+      )}
+    </span>
+  );
+}
+
 function CommentsSection({
   postId,
   comments,
@@ -295,15 +344,26 @@ function CommentsSection({
   const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(
     null,
   );
+  const [mentionedIds, setMentionedIds] = useState<Set<string>>(new Set());
   const addComment = useAddComment();
   const deleteComment = useDeleteComment();
   const userId = useAuthStore((s) => s.user?.id);
 
+  const handleMention = useCallback((id: string) => {
+    setMentionedIds((prev) => new Set(prev).add(id));
+  }, []);
+
   const handleSubmit = () => {
     if (!text.trim()) return;
-    addComment.mutate({ postId, body: text.trim(), parentId: replyTo?.id });
+    addComment.mutate({
+      postId,
+      body: text.trim(),
+      parentId: replyTo?.id,
+      mentionedUserIds: [...mentionedIds],
+    });
     setText("");
     setReplyTo(null);
+    setMentionedIds(new Set());
   };
 
   const topLevel = comments?.filter((c) => !c.parent_id) ?? [];
@@ -334,7 +394,7 @@ function CommentsSection({
               {formatRelative(comment.created_at)}
             </span>
           </p>
-          <ExpandableText text={comment.body} />
+          <CommentBody text={comment.body} />
           <div className="flex gap-2 mt-0.5">
             <button
               onClick={() =>
@@ -389,24 +449,14 @@ function CommentsSection({
       )}
 
       <div className="flex items-center gap-2">
-        <Input
+        <MentionInput
+          value={text}
+          onChange={setText}
+          onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+          onMention={handleMention}
           placeholder={
             replyTo ? `Responder ${replyTo.name}...` : "Escrever comentário..."
           }
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          onFocus={(e) =>
-            setTimeout(
-              () =>
-                e.target.scrollIntoView({
-                  behavior: "smooth",
-                  block: "center",
-                }),
-              300,
-            )
-          }
-          className="h-9 text-base sm:text-sm"
         />
         <Button
           size="sm"
