@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { posterUrl } from '@/shared/api/tmdb/client'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
+import { JellyfinBadge } from '@/features/jellyfin'
 import type { Request } from '../types/request.types'
 import {
   REQUEST_STATUS_LABELS,
@@ -33,13 +34,18 @@ export function RequestCard({ request }: RequestCardProps) {
       </Link>
       <div className="flex flex-col gap-1 min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <Link
-            to="/movie/$movieId"
-            params={{ movieId: String(request.tmdb_id) }}
-            className="font-medium truncate hover:underline"
-          >
-            {request.title}
-          </Link>
+          <div className="min-w-0">
+            <Link
+              to="/movie/$movieId"
+              params={{ movieId: String(request.tmdb_id) }}
+              className="font-medium truncate hover:underline"
+            >
+              {request.title}
+            </Link>
+            <div className="flex gap-1.5 mt-1">
+              <JellyfinBadge tmdbId={request.tmdb_id} />
+            </div>
+          </div>
           <Badge
             className={REQUEST_STATUS_COLORS[request.status]}
           >
