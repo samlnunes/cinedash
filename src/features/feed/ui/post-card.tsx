@@ -67,7 +67,7 @@ export function PostCard({ post }: PostCardProps) {
   const IMAGE_BASE = import.meta.env.VITE_TMDB_IMAGE_BASE;
   const endpoint =
     post.media_type === "tv" ? `/tv/${post.tmdb_id}` : `/movie/${post.tmdb_id}`;
-  const { data: tmdbDetail } = useQuery({
+  const { data: tmdbDetail, isLoading: backdropLoading } = useQuery({
     queryKey: ["feed-backdrop", post.tmdb_id],
     queryFn: () =>
       tmdbFetch<{ backdrop_path: string | null }>(endpoint, {
@@ -94,11 +94,15 @@ export function PostCard({ post }: PostCardProps) {
     <div className="rounded-lg border bg-card overflow-hidden">
       {/* Movie */}
       <div className="relative cursor-pointer" onClick={goToDetails}>
-        <img
-          src={backdropUrl ?? posterUrl(post.poster_path, "w500")}
-          alt={post.title}
-          className={`w-full object-cover ${backdropUrl ? "aspect-video" : "max-h-80 object-contain bg-black/50"}`}
-        />
+        {backdropLoading ? (
+          <div className="w-full aspect-video animate-pulse bg-muted" />
+        ) : (
+          <img
+            src={backdropUrl ?? posterUrl(post.poster_path, "w500")}
+            alt={post.title}
+            className={`w-full object-cover ${backdropUrl ? "aspect-video" : "max-h-80 object-contain bg-black/50"}`}
+          />
+        )}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-4 pt-16">
           <p className="text-lg font-bold text-white line-clamp-2">
             {post.title}
