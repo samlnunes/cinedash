@@ -7,7 +7,7 @@ interface JellyfinResult {
 }
 
 async function checkJellyfin(tmdbIds: number[]): Promise<Record<number, JellyfinResult>> {
-  const { data, error } = await supabase.functions.invoke('jellyfin-check', {
+  const { data, error } = await supabase.functions.invoke('jellyfin-check-availability', {
     body: { tmdb_ids: tmdbIds },
   })
 
