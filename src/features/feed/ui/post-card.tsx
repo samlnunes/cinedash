@@ -171,49 +171,21 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Actions */}
       <div className="flex items-center gap-2 px-4 pb-2">
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="xs"
-            className={likes?.hasLiked ? "text-red-500" : "text-muted-foreground"}
-            onClick={() =>
-              likes &&
-              toggleLike.mutate({ postId: post.id, hasLiked: likes.hasLiked })
-            }
-            disabled={toggleLike.isPending}
-          >
-            <Heart
-              className={`size-3.5 ${likes?.hasLiked ? "fill-red-500" : ""}`}
-            />
-          </Button>
-          {(likes?.count ?? 0) > 0 && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className={`text-xs -ml-1 hover:underline ${likes?.hasLiked ? "text-red-500" : "text-muted-foreground"}`}>
-                  {likes!.count}
-                </button>
-              </DialogTrigger>
-              <DialogContent className="max-w-xs">
-                <DialogHeader>
-                  <DialogTitle>Curtidas</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {likes!.users.map((u) => (
-                    <div key={u.user_id} className="flex items-center gap-3">
-                      <Avatar className="size-8">
-                        <AvatarImage src={u.avatar_url ?? undefined} />
-                        <AvatarFallback className="text-xs">
-                          {u.display_name.split(" ").map((w: string) => w[0]).slice(0, 2).join("").toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium">{u.display_name}</span>
-                    </div>
-                  ))}
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
+        <Button
+          variant="ghost"
+          size="xs"
+          className={likes?.hasLiked ? "text-red-500" : "text-muted-foreground"}
+          onClick={() =>
+            likes &&
+            toggleLike.mutate({ postId: post.id, hasLiked: likes.hasLiked })
+          }
+          disabled={toggleLike.isPending}
+        >
+          <Heart
+            className={`size-3.5 ${likes?.hasLiked ? "fill-red-500" : ""}`}
+          />
+          {likes?.count || 0}
+        </Button>
         <Button
           variant="ghost"
           size="xs"
@@ -232,6 +204,49 @@ export function PostCard({ post }: PostCardProps) {
           avatarUrl={profile?.avatar_url ?? null}
         />
       </div>
+
+      {/* Likes summary */}
+      {(likes?.count ?? 0) > 0 && (
+        <Dialog>
+          <DialogTrigger asChild>
+            <button className="px-4 pb-3 text-xs font-medium hover:underline text-left">
+              Curtido por {likes!.users[0]?.display_name}
+              {likes!.count > 1 && (
+                <>
+                  {" "}
+                  e{" "}
+                  <span className="font-semibold">
+                    outras {likes!.count - 1} pessoas
+                  </span>
+                </>
+              )}
+            </button>
+          </DialogTrigger>
+          <DialogContent className="max-w-xs">
+            <DialogHeader>
+              <DialogTitle>Curtidas</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {likes!.users.map((u) => (
+                <div key={u.user_id} className="flex items-center gap-3">
+                  <Avatar className="size-8">
+                    <AvatarImage src={u.avatar_url ?? undefined} />
+                    <AvatarFallback className="text-xs">
+                      {u.display_name
+                        .split(" ")
+                        .map((w: string) => w[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium">{u.display_name}</span>
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Comments */}
       {showComments && (
