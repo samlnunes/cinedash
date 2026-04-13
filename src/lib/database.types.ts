@@ -96,6 +96,11 @@ export interface Database {
           note: string | null
           status: 'pending' | 'approved' | 'downloading' | 'done' | 'rejected'
           admin_note: string | null
+          jellyseerr_request_id: number | null
+          jellyseerr_media_status: number | null
+          last_synced_at: string | null
+          download_progress_pct: number | null
+          download_eta: string | null
           created_at: string
           updated_at: string
         }
@@ -111,6 +116,11 @@ export interface Database {
           note?: string | null
           status?: 'pending' | 'approved' | 'downloading' | 'done' | 'rejected'
           admin_note?: string | null
+          jellyseerr_request_id?: number | null
+          jellyseerr_media_status?: number | null
+          last_synced_at?: string | null
+          download_progress_pct?: number | null
+          download_eta?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -126,6 +136,11 @@ export interface Database {
           note?: string | null
           status?: 'pending' | 'approved' | 'downloading' | 'done' | 'rejected'
           admin_note?: string | null
+          jellyseerr_request_id?: number | null
+          jellyseerr_media_status?: number | null
+          last_synced_at?: string | null
+          download_progress_pct?: number | null
+          download_eta?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -371,42 +386,6 @@ export interface Database {
         Relationships: [
           {
             foreignKeyName: 'notifications_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
-          },
-        ]
-      }
-      request_votes: {
-        Row: {
-          id: string
-          request_id: string
-          user_id: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          request_id: string
-          user_id: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          request_id?: string
-          user_id?: string
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'request_votes_request_id_fkey'
-            columns: ['request_id']
-            isOneToOne: false
-            referencedRelation: 'requests'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'request_votes_user_id_fkey'
             columns: ['user_id']
             isOneToOne: false
             referencedRelation: 'profiles'

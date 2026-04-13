@@ -70,13 +70,16 @@ export function NotificationBell() {
               {!n.read && (
                 <span className="mt-1.5 size-2 rounded-full bg-blue-500 shrink-0" />
               )}
-              <div className={`flex-1 min-w-0 ${n.read ? 'ml-5' : ''}`}>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium leading-snug ${n.read ? 'text-muted-foreground' : ''}`}>
+                  {n.title}
+                </p>
                 {n.body && (
-                  <p className={`text-sm leading-snug ${n.read ? 'text-muted-foreground' : ''}`}>
+                  <p className={`text-xs leading-snug mt-0.5 ${n.read ? 'text-muted-foreground/70' : 'text-muted-foreground'}`}>
                     {n.body}
                   </p>
                 )}
-                <p className="text-[11px] text-muted-foreground mt-0.5">
+                <p className="text-[11px] text-muted-foreground mt-1">
                   {formatRelative(n.created_at)}
                 </p>
               </div>

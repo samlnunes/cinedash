@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 import type { RequestStatus } from '../types/request.types'
 import { requestKeys } from './use-requests'
 
-export function useAdminRequests(statusFilter?: RequestStatus) {
+export function useAdminRequests(statusFilter?: RequestStatus, userId?: string) {
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export function useAdminRequests(statusFilter?: RequestStatus) {
   }, [queryClient])
 
   return useQuery({
-    queryKey: requestKeys.admin(statusFilter),
+    queryKey: [...requestKeys.admin(statusFilter), userId ?? 'all-users'],
     queryFn: async () => {
       let query = supabase
         .from('requests')
@@ -34,6 +34,10 @@ export function useAdminRequests(statusFilter?: RequestStatus) {
 
       if (statusFilter) {
         query = query.eq('status', statusFilter)
+      }
+
+      if (userId) {
+        query = query.eq('user_id', userId)
       }
 
       const { data, error } = await query

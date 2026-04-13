@@ -34,21 +34,21 @@ export function WatchlistCard({ item }: WatchlistCardProps) {
       <img
         src={posterUrl(item.poster_path, 'w185')}
         alt={item.title}
-        className="h-28 w-20 rounded object-cover shrink-0"
+        className="h-32 w-24 rounded object-cover shrink-0"
       />
-      <div className="flex flex-col gap-1 min-w-0 flex-1">
-        <p className="text-sm font-medium line-clamp-2">{item.title}</p>
+      <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+        <p className="text-base font-medium line-clamp-2">{item.title}</p>
         {item.year && (
           <p className="text-sm text-muted-foreground">{item.year}</p>
         )}
         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           <StarRating tmdbId={item.tmdb_id} size="sm" />
           {item.vote_average != null && (
-            <span className="text-xs text-muted-foreground">{item.vote_average.toFixed(1)}</span>
+            <span className="text-sm text-muted-foreground">{item.vote_average.toFixed(1)}</span>
           )}
         </div>
         <div className="flex items-center justify-between mt-auto" onClick={(e) => e.stopPropagation()}>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {new Date(item.added_at).toLocaleDateString('pt-BR')}
           </p>
           <div className="flex items-center gap-1">

@@ -33,19 +33,18 @@ export function useMyRequests() {
 
 export function useCreateRequest() {
   const queryClient = useQueryClient()
-  const userId = useAuthStore((s) => s.user?.id)
 
   return useMutation({
     mutationFn: async (
       request: Omit<RequestInsert, 'user_id' | 'id' | 'status' | 'created_at' | 'updated_at'>,
     ) => {
-      const { data, error } = await supabase
-        .from('requests')
-        .insert({ ...request, user_id: userId! })
-        .select()
-        .single()
+      // Delega ao Jellyseerr via edge function (que também grava em `requests`).
+      const { data, error } = await supabase.functions.invoke('jellyseerr-request', {
+        body: request,
+      })
 
       if (error) throw error
+      if (data?.error) throw new Error(data.error)
       return data
     },
     onSuccess: () => {
@@ -69,26 +68,6 @@ export function useCancelRequest() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: requestKeys.all })
     },
-  })
-}
-
-export function useCommunityRequests() {
-  const userId = useAuthStore((s) => s.user?.id)
-
-  return useQuery({
-    queryKey: [...requestKeys.all, 'community'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('requests')
-        .select('*, profiles(display_name, avatar_url)')
-        .eq('status', 'pending')
-        .neq('user_id', userId!)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      return data
-    },
-    enabled: !!userId,
   })
 }
 

@@ -1,23 +1,17 @@
 import { useState } from 'react'
-import { Inbox, Users } from 'lucide-react'
-import { Button } from '@/shared/ui/button'
+import { Inbox } from 'lucide-react'
 import {
   useMyRequests,
-  useCommunityRequests,
+  useJellyseerrSync,
   RequestCard,
   RequestFilters,
   type RequestStatus,
 } from '@/features/requests'
-import { CommunityRequestCard, groupCommunityRequests } from '@/features/requests/ui/community-request-card'
-
-type Tab = 'mine' | 'community'
 
 export function RequestsDashboard() {
-  const [tab, setTab] = useState<Tab>('mine')
   const [statusFilter, setStatusFilter] = useState<RequestStatus | 'all'>('all')
+  useJellyseerrSync()
   const { data: myRequests, isLoading: myLoading } = useMyRequests()
-  const { data: communityRequests, isLoading: communityLoading } = useCommunityRequests()
-  const grouped = communityRequests ? groupCommunityRequests(communityRequests as any) : []
 
   const filtered =
     statusFilter === 'all'
@@ -29,80 +23,32 @@ export function RequestsDashboard() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Pedidos</h1>
         <p className="text-muted-foreground">
-          {tab === 'mine'
-            ? 'Acompanhe o status dos filmes que você pediu.'
-            : 'Vote nos pedidos da comunidade para priorizá-los.'}
+          Acompanhe o status dos filmes que você pediu.
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex rounded-lg border bg-muted p-0.5">
-          <Button
-            variant={tab === 'mine' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setTab('mine')}
-          >
-            Meus
-          </Button>
-          <Button
-            variant={tab === 'community' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setTab('community')}
-          >
-            <Users className="size-4" />
-            Comunidade
-            {communityRequests && communityRequests.length > 0 && (
-              <span className="ml-1 rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-medium">
-                {communityRequests.length}
-              </span>
-            )}
-          </Button>
-        </div>
-        {tab === 'mine' && (
-          <RequestFilters value={statusFilter} onChange={setStatusFilter} />
-        )}
+      <div className="flex justify-end">
+        <RequestFilters value={statusFilter} onChange={setStatusFilter} />
       </div>
 
-      {tab === 'mine' && (
-        <>
-          {myLoading && <SkeletonGrid />}
+      {myLoading && <SkeletonGrid />}
 
-          {filtered && filtered.length === 0 && (
-            <Empty
-              message={
-                statusFilter === 'all'
-                  ? 'Você ainda não fez nenhum pedido.'
-                  : 'Nenhum pedido com este status.'
-              }
-            />
-          )}
-
-          {filtered && filtered.length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((request) => (
-                <RequestCard key={request.id} request={request} />
-              ))}
-            </div>
-          )}
-        </>
+      {filtered && filtered.length === 0 && (
+        <Empty
+          message={
+            statusFilter === 'all'
+              ? 'Você ainda não fez nenhum pedido.'
+              : 'Nenhum pedido com este status.'
+          }
+        />
       )}
 
-      {tab === 'community' && (
-        <>
-          {communityLoading && <SkeletonGrid />}
-
-          {!communityLoading && grouped.length === 0 && (
-            <Empty message="Nenhum pedido pendente da comunidade." />
-          )}
-
-          {grouped.length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {grouped.map((group) => (
-                <CommunityRequestCard key={group.tmdb_id} group={group} />
-              ))}
-            </div>
-          )}
-        </>
+      {filtered && filtered.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((request) => (
+            <RequestCard key={request.id} request={request} />
+          ))}
+        </div>
       )}
     </div>
   )

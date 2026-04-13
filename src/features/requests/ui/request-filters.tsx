@@ -26,11 +26,13 @@ export function RequestFilters({ value, onChange }: RequestFiltersProps) {
         <SelectItem value="all">Todos</SelectItem>
         {(
           Object.entries(REQUEST_STATUS_LABELS) as [RequestStatus, string][]
-        ).map(([key, label]) => (
-          <SelectItem key={key} value={key}>
-            {label}
-          </SelectItem>
-        ))}
+        )
+          .filter(([key]) => key !== 'pending')
+          .map(([key, label]) => (
+            <SelectItem key={key} value={key}>
+              {label}
+            </SelectItem>
+          ))}
       </SelectContent>
     </Select>
   )

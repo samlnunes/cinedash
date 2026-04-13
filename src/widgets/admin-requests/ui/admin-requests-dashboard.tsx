@@ -1,23 +1,34 @@
 import { useState } from "react";
-import { Inbox, Clock, CheckCircle, Download, Users, CalendarDays } from "lucide-react";
+import { Inbox, CheckCircle, Download, Users, CalendarDays, X } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { posterUrl } from "@/shared/api/tmdb/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
+import { Button } from "@/shared/ui/button";
 import {
   useAdminRequests,
+  useJellyseerrSync,
   RequestFilters,
+  DownloadProgress,
   type RequestStatus,
 } from "@/features/requests";
 import { AdminActions } from "@/features/requests/ui/admin-actions";
-import { VoteButton } from "@/features/requests/ui/vote-button";
 import { useAdminStats } from "@/features/requests/hooks/use-admin-stats";
+import { UsersListDialog } from "./users-list-dialog";
 
 export function AdminRequestsDashboard() {
   const [statusFilter, setStatusFilter] = useState<RequestStatus | "all">(
     "all",
   );
+  const [usersOpen, setUsersOpen] = useState(false);
+  const [userFilter, setUserFilter] = useState<{
+    id: string;
+    display_name: string;
+    avatar_url: string | null;
+  } | null>(null);
+  useJellyseerrSync();
   const { data: requests, isLoading } = useAdminRequests(
     statusFilter === "all" ? undefined : statusFilter,
+    userFilter?.id,
   );
   const { data: stats } = useAdminStats();
 
@@ -34,12 +45,52 @@ export function AdminRequestsDashboard() {
       </div>
 
       {stats && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          <StatCard icon={Clock} label="Pendentes" value={stats.pending} color="text-yellow-500" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard icon={CheckCircle} label="Aprovados" value={stats.approved} color="text-green-500" />
           <StatCard icon={Download} label="Baixando" value={stats.downloading} color="text-blue-500" />
-          <StatCard icon={Users} label="Usuários" value={stats.users} color="text-purple-500" />
+          <StatCard
+            icon={Users}
+            label="Usuários"
+            value={stats.users}
+            color="text-purple-500"
+            onClick={() => setUsersOpen(true)}
+          />
           <StatCard icon={CalendarDays} label="Este mês" value={stats.thisMonth} color="text-orange-500" />
+        </div>
+      )}
+
+      <UsersListDialog
+        open={usersOpen}
+        onOpenChange={setUsersOpen}
+        onSelectUser={(u) =>
+          setUserFilter({
+            id: u.id,
+            display_name: u.display_name,
+            avatar_url: u.avatar_url,
+          })
+        }
+      />
+
+      {userFilter && (
+        <div className="flex items-center gap-2 rounded-lg border bg-muted/50 px-3 py-2">
+          <Avatar className="size-6">
+            <AvatarImage src={userFilter.avatar_url ?? undefined} />
+            <AvatarFallback className="text-[10px]">
+              {userFilter.display_name[0]}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-sm">
+            Filtrando pedidos de <strong>{userFilter.display_name}</strong>
+          </span>
+          <Button
+            variant="ghost"
+            size="xs"
+            className="ml-auto"
+            onClick={() => setUserFilter(null)}
+          >
+            <X className="size-3" />
+            Limpar
+          </Button>
         </div>
       )}
 
@@ -89,33 +140,38 @@ function AdminRequestList({ requests }: { requests: any[] }) {
         return (
           <div
             key={request.id}
-            className="flex gap-3 rounded-lg border bg-card p-3 cursor-pointer transition-colors hover:bg-accent/50 overflow-hidden"
+            className="flex gap-4 rounded-lg border bg-card p-4 cursor-pointer transition-colors hover:bg-accent/50 overflow-hidden"
             onClick={goToDetails}
           >
             <img
               src={posterUrl(request.poster_path, "w185")}
               alt={request.title}
-              className="h-24 w-16 rounded object-cover shrink-0"
+              className="h-32 w-24 rounded object-cover shrink-0"
             />
-            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-              <p className="text-sm font-medium line-clamp-2">{request.title}</p>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+              <p className="text-base font-medium line-clamp-2">{request.title}</p>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 {profile && (
                   <>
-                    <Avatar className="size-3.5">
+                    <Avatar className="size-6">
                       <AvatarImage src={profile.avatar_url ?? undefined} />
-                      <AvatarFallback className="text-[7px]">
+                      <AvatarFallback className="text-[10px]">
                         {(profile.display_name ?? '?')[0]}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="truncate max-w-[80px]">{profile.display_name}</span>
+                    <span className="truncate max-w-[140px]">{profile.display_name}</span>
                     <span>·</span>
                   </>
                 )}
                 <span>{new Date(request.created_at).toLocaleDateString("pt-BR")}</span>
               </div>
-              <div className="flex items-center justify-between mt-auto" onClick={(e) => e.stopPropagation()}>
-                <VoteButton requestId={request.id} />
+              {request.note && (
+                <p className="text-sm text-muted-foreground italic truncate">
+                  "{request.note}"
+                </p>
+              )}
+              <DownloadProgress request={request} className="mt-1" />
+              <div className="flex items-center justify-end mt-auto" onClick={(e) => e.stopPropagation()}>
                 <AdminActions request={request} />
               </div>
             </div>
@@ -131,19 +187,29 @@ function StatCard({
   label,
   value,
   color,
+  onClick,
 }: {
   icon: React.ComponentType<{ className?: string }>
   label: string
   value: number
   color: string
+  onClick?: () => void
 }) {
+  const isClickable = Boolean(onClick)
+  const Component = isClickable ? 'button' : 'div'
   return (
-    <div className="rounded-lg border bg-card p-4">
+    <Component
+      type={isClickable ? 'button' : undefined}
+      onClick={onClick}
+      className={`rounded-lg border bg-card p-4 text-left w-full ${
+        isClickable ? 'cursor-pointer transition-colors hover:bg-accent/50' : ''
+      }`}
+    >
       <div className="flex items-center gap-2">
         <Icon className={`size-4 ${color}`} />
         <span className="text-sm text-muted-foreground">{label}</span>
       </div>
       <p className="text-2xl font-bold mt-1">{value}</p>
-    </div>
+    </Component>
   );
 }
