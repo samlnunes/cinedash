@@ -1,5 +1,11 @@
 import { Share2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
 
 interface ShareStoryProps {
   title: string;
@@ -8,6 +14,10 @@ interface ShareStoryProps {
   body: string | null;
   userName: string;
   avatarUrl: string | null;
+}
+
+interface GenerateOptions extends ShareStoryProps {
+  includeBody?: boolean;
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -39,7 +49,8 @@ async function generateStoryImage({
   body,
   userName,
   avatarUrl,
-}: ShareStoryProps): Promise<Blob> {
+  includeBody = true,
+}: GenerateOptions): Promise<Blob> {
   const W = 1080;
   const H = 1920;
   const canvas = document.createElement("canvas");
@@ -59,7 +70,8 @@ async function generateStoryImage({
   const avatarOverlap = 40;
   const titleH = 60;
   const starsH = rating ? 56 : 0;
-  const bodyH = body ? Math.min(Math.ceil(body.length / 40), 4) * 44 + 30 : 0;
+  const showBody = includeBody && body;
+  const bodyH = showBody ? Math.min(Math.ceil(body.length / 40), 4) * 44 + 30 : 0;
   const brandingH = 70;
   const totalH = avatarOverlap + posterH + titleH + starsH + bodyH + brandingH;
   const startY = Math.max(80, (H - totalH) / 2);
@@ -176,7 +188,7 @@ async function generateStoryImage({
   }
 
   // Comment
-  if (body) {
+  if (showBody) {
     currentY += 20;
     ctx.fillStyle = "#a1a1aa";
     ctx.font = "italic 32px sans-serif";
@@ -262,32 +274,63 @@ function drawStar(
   ctx.fill();
 }
 
-export function ShareStoryButton(props: ShareStoryProps) {
-  const handleShare = async () => {
-    const blob = await generateStoryImage(props);
-    const file = new File([blob], "cinedash-story.png", { type: "image/png" });
+async function shareImage(blob: Blob) {
+  const file = new File([blob], "cinedash-story.png", { type: "image/png" });
 
-    if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file] });
-    } else {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "cinedash-story.png";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+  if (navigator.canShare?.({ files: [file] })) {
+    await navigator.share({ files: [file] });
+  } else {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cinedash-story.png";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+export function ShareStoryButton(props: ShareStoryProps) {
+  const hasBody = !!props.body;
+
+  const handleShare = async (includeBody: boolean) => {
+    const blob = await generateStoryImage({ ...props, includeBody });
+    await shareImage(blob);
   };
 
+  if (!hasBody) {
+    return (
+      <Button
+        variant="ghost"
+        size="xs"
+        className="text-muted-foreground"
+        onClick={() => handleShare(false)}
+      >
+        <Share2 className="size-3.5" />
+        Story
+      </Button>
+    );
+  }
+
   return (
-    <Button
-      variant="ghost"
-      size="xs"
-      className="text-muted-foreground"
-      onClick={handleShare}
-    >
-      <Share2 className="size-3.5" />
-      Story
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="xs"
+          className="text-muted-foreground"
+        >
+          <Share2 className="size-3.5" />
+          Story
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuItem onClick={() => handleShare(true)}>
+          Com comentário
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleShare(false)}>
+          Sem comentário
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
